@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "acodsp"
+version = "0.1.0"
+description = "Programmatic control of Audiotec Fischer ACO-platform DSP amplifiers (MATCH / HELIX / BRAX) over USB."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Christian Probst" }]
+dependencies = ["pyserial>=3.5", "PyYAML>=5.4"]
+
+[project.optional-dependencies]
+usb = ["pyusb>=1.2"]
+encoding = ["numpy>=1.21"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+acodsp = "acodsp.cli:main"
+
+[tool.setuptools]
+packages = ["acodsp"]
+
+[tool.setuptools.package-data]
+acodsp = ["data/*.json", "data/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

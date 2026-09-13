@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+# never commit vendor artifacts
+*.at01
+*.AF1
+*.aco
+*.rem
+*.exe
+.pytest_cache/
+.mypy_cache/
+
+# local RE artifacts — extracted/decompiled vendor firmware, never commit
+analysis/
+# internal working notes, RE journal, and RE-only scripts (not shipped)
+internal/

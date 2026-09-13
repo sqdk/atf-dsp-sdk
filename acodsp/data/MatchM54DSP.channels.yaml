@@ -1,0 +1,146 @@
+# Channel-model semantic overlay for MATCH M 5.4DSP.
+# The STRUCTURE (counts, band counts, matrix dims) is DISCOVERED from the .at01 by
+# tools/discover_channels.py and must not be duplicated here. This file only carries
+# the SEMANTIC layer that can't be derived from names alone: human labels, which EQ
+# block is which, virtual-channel identities, and routing orientation.
+#
+# Anything marked `provisional: true` is a best-guess pending PC-Tool UI confirmation
+# (a screenshot). Flipping a provisional value here must be the ONLY change needed —
+# the engine reads these, it does not hardcode them.
+model: "MATCH M 5.4DSP"
+provisional_note: >
+  RESOLVED by PC-Tool screenshot (Outputs > Equalization, "Demo 1" setup, 2026-08-26):
+  the per-OUTPUT EQ is a 30-band graphic/parametric EQ (ISO 1/3-oct 25 Hz..20 kHz) =>
+  EQ1(15) + EQ2 cascaded together are the OUTPUT EQ (H-alt confirmed). Virtual-channel EQ
+  is the separate Virtual tab (GLOBAL_EQ zones) — still to be screenshot-confirmed.
+  Discovered: inputs=4 (A-D), outputs=9 (A-I), EQ1=9 inst x15 bands, EQ2=9 inst x16 bands.
+  Output labels below are the confirmed defaults for the "Demo 1" setup (role assignment is
+  routing-dependent; these are this setup's mapping).
+
+# --- name templates: how a (class, id, band, coeff) resolves to a .at01 param name ---
+# {inst} is "" for instance 1 else "_<n>"; {band}=STAGE index; {coeff} in B2,B1,B0,A2,A1.
+templates:
+  input_eq:   "MOD_INPUT_EQ_LINE_INPUTEQ{letter}_ALG0_STAGE{band}_{coeff}"
+  eq1:        "MOD_EQUALIZER_EQ1{inst}_ALG0_STAGE{band}_{coeff}"
+  eq2:        "MOD_EQUALIZER_EQ2{inst}_ALG0_STAGE{band}_{coeff}"
+  global_eq:  "MOD_GLOBAL_EQ_{subblock}_ALG0_STAGE{band}_{coeff}"   # virtual-channel EQ (per sub-block)
+  # Output channel gain/level = the OUTPUTMUTE gain/mute cell (gain value, or 0 = mute).
+  # HARDWARE-CONFIRMED 2026-08-26: PC-Tool Output A gain -6dB landed in MOD_OUTPUTMUTE_ALG0_MUTE0.
+  # (Was MOD_GAIN_GAIN{letter} — WRONG; that read unity. -6dB also mirrored in MOD_REDUCEDGAIN.)
+  output_gain: "MOD_OUTPUTMUTE_ALG0_MUTE{index}"
+  output_mute: "MOD_OUTPUTMUTE_ALG0_MUTE{index}"     # same cell (gain/mute); mute=0
+  output_delay: "MOD_DELAY__PHASE_SWITCH_DELAY{letter}_DELAYAMT"
+  # Per-output polarity/phase-invert (Helix "Polarity normal/inverted"): the INV{letter} sub-cell
+  # in the same DELAY__PHASE_SWITCH module. PREFIX-wildcard (the trailing INVERT<n> index is not a
+  # clean function of the letter). ENCODING PROVISIONAL (±1.0 sign multiplier) — unvalidated on hw.
+  output_polarity: "MOD_DELAY__PHASE_SWITCH_INV{letter}_*"
+  # Virtual channel gain/level = VCP (Virtual Channel Processing) gain/mute cell.
+  # HARDWARE-CONFIRMED: PC-Tool Virtual A gain -9dB landed in MOD_VCPMUTE_ALG0_MUTE0.
+  virtual_gain: "MOD_VCPMUTE_ALG0_MUTE{index}"
+  input_mute:  "MOD_INPUTGAIN_ALG0_MUTE{index}"
+
+# --- EQ block -> channel-class assignment (CONFIRMED via screenshot) ---
+# Output EQ = EQ1 + EQ2 cascaded. Engine maps output band i: 0..14 -> EQ1 stage i,
+# 15..30 -> EQ2 stage i-15. Bands 0..29 are the 30 UI graphic bands (ISO centers below);
+# band 30 (EQ2 stage 15) is an extra physical stage, likely the "Fine EQ" — role unconfirmed.
+eq_blocks:
+  EQ1: { assigned_to: output, provisional: false }   # output EQ, first 15 bands (25 Hz..)
+  EQ2: { assigned_to: output, provisional: false }   # output EQ, next 16 stages (bands 15..30)
+  # Virtual-channel EQ is NOT a class-block mapping — it uses the explicit per-channel
+  # sub-block lists under `virtual_channels.channels` (GLOBAL_EQ), see below.
+ui_band_count: 30            # confirmed from screenshot; 31 physical stages exist (band 30 = extra/Fine-EQ)
+# Graphic-EQ defaults, shared by the OUTPUT (EQUALIZER) and VIRTUAL (GLOBAL_EQ) 30-band EQs:
+# the ISO 1/3-octave centre per band (band index -> Hz), and the default Q used when you set a
+# band by number. Used by output/virtual `.band_frequency(i)` and `.set_band_gain(i, dB)`.
+graphic_eq:
+  frequencies_hz: [25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+                   630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300,
+                   8000, 10000, 12500, 16000, 20000]
+  default_q: 4.318           # constant-Q 1/3-oct; PC-Tool "Fine EQ" showed ~4.3. INFERRED from UI,
+                             # not hardware-confirmed — override per call with Q= if needed.
+
+# --- input channels: labels are per-device; discovered letters get provisional labels ---
+inputs:
+  label_source: exe_strings   # exe has "Input A".."Input H"; count from param map
+  labels: { A: "Input A", B: "Input B", C: "Input C", D: "Input D" }
+  provisional: true
+
+# --- virtual channels (the tuning/processing channels) — CONFIRMED via screenshot ---
+# 8 virtual channels A,B,C,D,E,F,H,I (NO G, matching the PC-Tool "Virtual" tab).
+# Each has a 30-band EQ = two consecutive 15-stage GLOBAL_EQ sub-blocks (via `global_eq`
+# template). Bands 0..14 -> first sub-block, 15..29 -> second. Note the vendor naming
+# quirk: the SUB zone's first block is spelled ...SUB_GLOBALEQFRONTL1 (verified to exist).
+virtual_channels:
+  eq_bands: 30
+  # `label` below = the illustrative "Demo 1" setup name (exposed as .setup_label, and usable as a
+  # convenience selector e.g. virtual("Subwoofer 1")). Canonical .label is the letter ("Virtual A").
+  channels:
+    A: { label: "Front L",      eq_subblocks: [FRONT_GLOBALEQFRONTL1, FRONT_GLOBALEQFRONTL2] }
+    B: { label: "Front R",      eq_subblocks: [FRONT_GLOBALEQFRONTR1, FRONT_GLOBALEQFRONTR2] }
+    C: { label: "Rear L",       eq_subblocks: [REAR_GLOBALEQREARL1, REAR_GLOBALEQREARL2] }
+    D: { label: "Rear R",       eq_subblocks: [REAR_GLOBALEQREARR1, REAR_GLOBALEQREARR2] }
+    E: { label: "Front Center", eq_subblocks: [CENTER_GLOBALEQCF1, CENTER_GLOBALEQCF2] }
+    F: { label: "Rear Center",  eq_subblocks: [CENTER_REAR_GLOBALEQCENTERREAR1, CENTER_REAR_GLOBALEQCENTERREAR2] }
+    G: { label: "Pass Through 1", pass_through: true }   # exists in routing but has NO EQ (absent from Virtual EQ tab)
+    H: { label: "Subwoofer 1",  eq_subblocks: [SUB_GLOBALEQFRONTL1, SUB_GLOBALEQSUBL2] }
+    I: { label: "Subwoofer 2",  eq_subblocks: [SUB_GLOBALEQSUBR1, SUB_GLOBALEQSUBR2] }
+  # order = matrix row order (A..I). G is pass-through: virtual('G').eq_band must raise (no EQ).
+  # remaining-provisional: exact band->sub-block ordering (which block is the low half)
+  # and the virtual gain/mute param mapping (GAIN role prefixes) — confirm on hardware/readback.
+
+# --- physical outputs A-I; their ROLE/label is defined by live routing, not static ---
+# Labels below = confirmed defaults for the "Demo 1" setup (from the screenshot). Role is
+# routing-dependent in general, so treat these as the default-setup mapping, not immutable.
+outputs:
+  letters_from: discovery
+  # CANONICAL identity is the letter (engine exposes .label = "Output A".."Output I", matching the
+  # PC-Tool [A]..[I] pointers). The names below are ILLUSTRATIVE labels from the "Demo 1" setup only
+  # (exposed as the optional .setup_label) — they are per-setup, NOT device constants; a different
+  # .pct6 renames them. Never used as an addressing key.
+  demo_setup_labels: { A: "Front Left", B: "Front Right", C: "Rear Left", D: "Rear Right",
+                       E: "Subwoofer", F: "Line Out 1", G: "Line Out 2", H: "Line Out 3", I: "Line Out 4" }
+  # processing tags seen next to channels in the UI (informational): C/D=[RearATT], E/F/G=[SubRC]
+  eq_bands: 30                 # graphic EQ bands (see output_eq_frequencies_hz); 31 physical stages
+  has_crossover: true          # HP + LP sections (Frequency, Characteristic=Linkwitz/.., Slope, Q)
+  has_delay: true              # Time Alignment tab; UI unit = cm (distance) or ms
+  has_polarity: true
+
+# --- routing: TWO matrices in the signal chain (Signal Management > Routing tab).
+# Cells are 8.24 linear-gain mix coefficients; VOL{row}{col} with row=DESTINATION,
+# col=SOURCE (confirmed from Main->Virtual: Virtual A row0 <- Input A col2 @11%, oracle 2026-08-28).
+# Read live via 0x02 on the cell params; write via SafeLoad (routing encoder = hypothesis).
+routing:
+  matrices:
+    input_to_virtual:                                    # "Main/Digital to Virtual Routing"
+      template: "MOD_MAINMATRIX_ALG0_NXNMIXS3004P6ALG2VOL{row}{col}"
+      rows: virtual        # 9 (A..I)
+      # 6 SOURCE columns. The `sources` list below IS the column map: its POSITION = the DSP
+      # column, so a source NAME/letter resolves to a column by its index here (see
+      # channels._input_source_index). DECODED DEFINITIVELY vs the DSP PC-Tool oracle
+      # (~/Downloads/input-routing-diag*.pct6, 2026-08-28): the Main physical inputs A/B/C/D
+      # occupy columns 2/3/4/5 (NOT 0-3); columns 0/1 are the DIGITAL pair (In L/R). Verified:
+      # Input A/B/C/D -> Virtual A produced G2/G3/G4/G5 (row0, cols2-5); Input A -> Virtual C = G14
+      # (row2, col2). G = virtual_row*INS(6) + column; routing % = linear*100. The digital L/R
+      # ORDER within cols 0/1 is the documented best-guess (L=0, R=1, matching the OPTOMIXER block).
+      cols: input          # 6 sources: [0]=Digital L, [1]=Digital R, [2]=Main A, [3]=Main B, [4]=Main C, [5]=Main D
+      dims: [9, 6]
+      confirmed: true      # orientation + dims + Main column map confirmed from the Main->Virtual oracle
+      sources: ["Digital In L", "Digital In R", "Input A", "Input B", "Input C", "Input D"]
+    digital_to_virtual:                                  # "Digital to Virtual Routing" (OPTOMIXER ALG5)
+      template: "MOD_OPTOMIXER_2_ALG0_NXNMIXS3004P6ALG5VOL{row}{col}"
+      rows: virtual        # 9 (A..I)
+      cols: input          # 2 digital sources: [0]=Digital In L, [1]=Digital In R
+      dims: [9, 2]
+      confirmed: true      # 9x2 OPTOMIXER == PC-Tool "Digital->Virtual" block (INS=2 OUTS=9);
+                           # G-orientation (n = virtual*2 + digital) matches the real M54 file's R1.
+      sources: ["Digital In L", "Digital In R"]
+    virtual_to_output:                                   # "Virtual to Output Routing" sub-tab
+      template: "MOD_NXMLINEAR1_ALG0_NXNMIXS3004P6ALG4VOL{row}{col}"
+      rows: output         # 9 (A..I)
+      cols: virtual        # 9 (A..I)
+      dims: [9, 9]
+      confirmed: true      # CONFIRMED via screenshot (2026-08-26): outputs are destinations (right),
+                           # virtual are sources (left); e.g. [E] Subwoofer <- Virtual H = VOL0407.
+  read_live: true
+  # other mixers present (not user routing): INPUTRTA source-select (NXNMIXS3004P6ALG1),
+  # OPTOMIXER/HEC (NXNMIXS3004P6ALG5, 9x2).

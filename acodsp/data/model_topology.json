@@ -1,0 +1,2887 @@
+{
+ "BRAX DSP": {
+  "complete": false,
+  "eq_blocks": {},
+  "inputs": {
+   "count": 0,
+   "eq_bands": 11,
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 0,
+   "delay_letters": [],
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "xover_letters": []
+  },
+  "param_count": 3841,
+  "roles": {
+   "gain_role_prefixes": [],
+   "global_eq_zones": []
+  },
+  "routing_matrix": {
+   "cells": 308,
+   "cols": 14,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 14
+  }
+ },
+ "HELIX AMPLIFY 206 DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 8
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 8
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 8,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ]
+  },
+  "param_count": 4120,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 192,
+   "cols": 10,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 8
+  }
+ },
+ "HELIX DSP MINI": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 6
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 6
+   }
+  },
+  "inputs": {
+   "count": 4,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "outputs": {
+   "count": 6,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ]
+  },
+  "param_count": 2139,
+  "roles": {
+   "gain_role_prefixes": [],
+   "global_eq_zones": []
+  },
+  "routing_matrix": {
+   "cells": 110,
+   "cols": 8,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 8
+  }
+ },
+ "HELIX DSP MINI MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 6
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 6
+   }
+  },
+  "inputs": {
+   "count": 4,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "outputs": {
+   "count": 6,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ]
+  },
+  "param_count": 2115,
+  "roles": {
+   "gain_role_prefixes": [],
+   "global_eq_zones": []
+  },
+  "routing_matrix": {
+   "cells": 110,
+   "cols": 8,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 8
+  }
+ },
+ "HELIX DSP PRO MK3": {
+  "complete": false,
+  "eq_blocks": {},
+  "inputs": {
+   "count": 8,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 0,
+   "delay_letters": [],
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "xover_letters": []
+  },
+  "param_count": 4790,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 326,
+   "cols": 12,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 12
+  }
+ },
+ "HELIX DSP ULTRA": {
+  "complete": false,
+  "eq_blocks": {},
+  "inputs": {
+   "count": 0,
+   "eq_bands": 16,
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 0,
+   "delay_letters": [],
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "xover_letters": []
+  },
+  "param_count": 5279,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 406,
+   "cols": 14,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 14
+  }
+ },
+ "HELIX DSP ULTRA S": {
+  "complete": false,
+  "eq_blocks": {},
+  "inputs": {
+   "count": 0,
+   "eq_bands": 16,
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 0,
+   "delay_letters": [],
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "xover_letters": []
+  },
+  "param_count": 5279,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 406,
+   "cols": 14,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 14
+  }
+ },
+ "HELIX DSP ULTRA XT": {
+  "complete": false,
+  "eq_blocks": {},
+  "inputs": {
+   "count": 0,
+   "eq_bands": 16,
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ]
+  },
+  "outputs": {
+   "count": 0,
+   "delay_letters": [],
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "xover_letters": []
+  },
+  "param_count": 6784,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 734,
+   "cols": 18,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 18
+  }
+ },
+ "HELIX DSP.3": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 8
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 8
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 8,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ]
+  },
+  "param_count": 2774,
+  "roles": {
+   "gain_role_prefixes": [],
+   "global_eq_zones": []
+  },
+  "routing_matrix": {
+   "cells": 160,
+   "cols": 10,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 10
+  }
+ },
+ "HELIX DSP.3S": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 8
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 8
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 8,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ]
+  },
+  "param_count": 2760,
+  "roles": {
+   "gain_role_prefixes": [],
+   "global_eq_zones": []
+  },
+  "routing_matrix": {
+   "cells": 160,
+   "cols": 10,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 10
+  }
+ },
+ "HELIX ISM 400.2DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 1
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 1
+   }
+  },
+  "inputs": {
+   "count": 2,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B"
+   ],
+   "mute_indices": [
+    0,
+    1
+   ]
+  },
+  "outputs": {
+   "count": 1,
+   "delay_letters": [
+    "A"
+   ],
+   "letters": [
+    "A"
+   ],
+   "mute_indices": [],
+   "xover_letters": [
+    "A"
+   ]
+  },
+  "param_count": 777,
+  "roles": {
+   "gain_role_prefixes": [],
+   "global_eq_zones": []
+  },
+  "routing_matrix": {
+   "cells": 6,
+   "cols": 2,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 1
+  }
+ },
+ "HELIX M FOUR DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 10
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 10
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 10,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ]
+  },
+  "param_count": 4593,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 248,
+   "cols": 10,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 10
+  }
+ },
+ "HELIX M SIX DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 10
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 10
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 10,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ]
+  },
+  "param_count": 4593,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 248,
+   "cols": 10,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 10
+  }
+ },
+ "HELIX P SIX DSP ULTIMATE": {
+  "complete": false,
+  "eq_blocks": {},
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 0,
+   "delay_letters": [],
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "xover_letters": []
+  },
+  "param_count": 5049,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 328,
+   "cols": 12,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 12
+  }
+ },
+ "HELIX V EIGHT DSP MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 10
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 10
+   }
+  },
+  "inputs": {
+   "count": 8,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 10,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J"
+   ]
+  },
+  "param_count": 4829,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 326,
+   "cols": 12,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 12
+  }
+ },
+ "HELIX V EIGHT DSP ULTIMATE": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 14
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 14
+   }
+  },
+  "inputs": {
+   "count": 12,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ]
+  },
+  "outputs": {
+   "count": 14,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M"
+   ]
+  },
+  "param_count": 6263,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 622,
+   "cols": 18,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 16
+  }
+ },
+ "HELIX V EIGHTEEN DSP": {
+  "complete": false,
+  "eq_blocks": {},
+  "inputs": {
+   "count": 18,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ]
+  },
+  "outputs": {
+   "count": 0,
+   "delay_letters": [],
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "xover_letters": []
+  },
+  "param_count": 8454,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 1036,
+   "cols": 22,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 22
+  }
+ },
+ "HELIX V TWELVE DSP": {
+  "complete": false,
+  "eq_blocks": {},
+  "inputs": {
+   "count": 12,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ]
+  },
+  "outputs": {
+   "count": 14,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+   ],
+   "xover_letters": []
+  },
+  "param_count": 6215,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 562,
+   "cols": 16,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 16
+  }
+ },
+ "HELIX V TWELVE DSP MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 14
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 14
+   }
+  },
+  "inputs": {
+   "count": 12,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ]
+  },
+  "outputs": {
+   "count": 14,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M"
+   ]
+  },
+  "param_count": 6199,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 562,
+   "cols": 16,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 16
+  }
+ },
+ "MATCH M 5.4DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 9
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 9
+   }
+  },
+  "inputs": {
+   "count": 4,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "outputs": {
+   "count": 9,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ]
+  },
+  "param_count": 3937,
+  "roles": {
+   "gain_role_prefixes": [
+    "CENTER",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ],
+   "global_eq_zones": [
+    "CENTER",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 157,
+   "cols": 9,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 9
+  }
+ },
+ "MATCH M 5DSP MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 7
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 7
+   }
+  },
+  "inputs": {
+   "count": 4,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "outputs": {
+   "count": 7,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ]
+  },
+  "param_count": 2128,
+  "roles": {
+   "gain_role_prefixes": [],
+   "global_eq_zones": []
+  },
+  "routing_matrix": {
+   "cells": 60,
+   "cols": 6,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 7
+  }
+ },
+ "MATCH PP 86DSP MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 9
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 9
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 9,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ]
+  },
+  "param_count": 4420,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 265,
+   "cols": 11,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 11
+  }
+ },
+ "MATCH UP 10DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 11
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 11
+   }
+  },
+  "inputs": {
+   "count": 8,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 11,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ]
+  },
+  "param_count": 5129,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 365,
+   "cols": 13,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 13
+  }
+ },
+ "MATCH UP 10DSP - 24V": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 11
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 11
+   }
+  },
+  "inputs": {
+   "count": 8,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 11,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ]
+  },
+  "param_count": 5129,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 365,
+   "cols": 13,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 13
+  }
+ },
+ "MATCH UP 10DSP MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 11
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 11
+   }
+  },
+  "inputs": {
+   "count": 8,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 11,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
+   ]
+  },
+  "param_count": 5129,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 365,
+   "cols": 13,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 13
+  }
+ },
+ "MATCH UP 4DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 5
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 5
+   }
+  },
+  "inputs": {
+   "count": 4,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  "outputs": {
+   "count": 5,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+   ]
+  },
+  "param_count": 3091,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 116,
+   "cols": 8,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 8
+  }
+ },
+ "MATCH UP 6DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 7
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 7
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 7,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ]
+  },
+  "param_count": 3767,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 201,
+   "cols": 10,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 9
+  }
+ },
+ "MATCH UP 6DSP MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 7
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 7
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 7,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G"
+   ]
+  },
+  "param_count": 3767,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 201,
+   "cols": 10,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 9
+  }
+ },
+ "MATCH UP 8BMW": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 9
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 9
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 9,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ]
+  },
+  "param_count": 4402,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 265,
+   "cols": 11,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 11
+  }
+ },
+ "MATCH UP 8BMW MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 9
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 9
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 9,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ]
+  },
+  "param_count": 4402,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 265,
+   "cols": 11,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 11
+  }
+ },
+ "MATCH UP 8DSP": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 9
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 9
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 9,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ]
+  },
+  "param_count": 4402,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 265,
+   "cols": 11,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 11
+  }
+ },
+ "MATCH UP 8DSP MK2": {
+  "complete": true,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 9
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 9
+   }
+  },
+  "inputs": {
+   "count": 6,
+   "eq_bands": 16,
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  "outputs": {
+   "count": 9,
+   "delay_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "xover_letters": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+   ]
+  },
+  "param_count": 4402,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 265,
+   "cols": 11,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 11
+  }
+ }
+}
