@@ -16,6 +16,36 @@ Analyzer — from macOS, Linux, or Windows.
 > Use at your own risk; writing wrong values to a DSP can damage speakers. See
 > the safety notes below.
 
+## Overview
+
+`atf-dsp-sdk` talks to the amplifier's DSP over its USB-CDC serial link and,
+roughly bottom to top, provides:
+
+- **Transport & protocol** — the reverse-engineered ACO command framing
+  (checksummed `B`/`C` envelopes), parameter read/write, and clean setup
+  switching (`0x1F`), plus a dry-run mode that builds frames without touching
+  hardware.
+- **Parameter maps** — per-model name↔address maps generated from the vendor
+  `.at01` device files, so parameters are addressable by symbolic name.
+- **Fixed-point encoders** — pure functions for the ADAU1452's native 8.24
+  format: gain (dB), mute, integer-sample delay, RBJ biquad EQ bands, and
+  crossover biquad chains.
+- **Typed control surface** — `gain / mute / delay / eq_band / crossover /
+  routing / polarity`, written glitch-free through the firmware's own SafeLoad
+  path.
+- **Channel model** — a data-driven abstraction over inputs, virtual (tuning)
+  channels, outputs, and the two routing matrices, addressed by PC-Tool letter
+  identity; topology is discovered, never hardcoded.
+- **Input Signal Analyzer / RTA** — read the on-chip per-channel level and
+  spectrum readback cells.
+- **Vendor project files** — parse and apply `.pct6` / `.at01` setups
+  (`apply_setup`), plus a validation harness that round-trips SDK state against a
+  PC-Tool-authored `.pct6` as an independent oracle.
+- **CLI** — `list`, `identify`, `get-setup`, `set-setup`, `read`, `write`.
+
+Everything writable goes through a dry-run / `unsafe` gating model, so nothing
+unvalidated writes to an amp silently.
+
 ## Install
 
 ```bash
@@ -71,9 +101,12 @@ overlay labels only, never an addressing key. Counts and shapes come from
 `tools/discover_channels.py` plus a per-model `.channels.yaml` overlay; nothing
 about the channel topology is hardcoded.
 
-Some encoders (delay / crossover / routing values, virtual gain/mute) are still
-gated behind `unsafe=True` pending hardware readback confirmation. See
-[docs/channels.md](docs/channels.md) for the current status matrix.
+All typed value encoders — gain, mute, delay, EQ, crossover, and routing — are
+hardware-confirmed against the MATCH M 5.4DSP and need no `unsafe=True`. Only
+**polarity** (an assumed ±1.0 sign multiplier) remains provisional and stays
+gated behind `unsafe=True` pending readback confirmation. See
+[docs/channels.md](docs/channels.md) for the full status matrix and
+[Hardware validation](#hardware-validation) below.
 
 ## Protocol & format documentation
 
@@ -90,13 +123,55 @@ The reverse-engineered protocol, on-wire framing, fixed-point encoders, the
 - [docs/input-analyzer-re.md](docs/input-analyzer-re.md) — on-chip Input Signal
   Analyzer
 
-## Supported models
+## Device support
 
-Anything on the ACO platform (USB VID `0x2E4F`) should identify. Development
-and hardware validation to date has been against **MATCH M 5.4DSP**. Other
-MATCH / HELIX / BRAX models are supported by generating a param map from the
-vendor `.at01` (see `tools/build_param_maps.py`); raw vendor files are never
-committed.
+The ~35 models on the Audiotec Fischer **ACO platform** (USB VID `0x2E4F`) share
+a single firmware; only the USB PID and the per-model parameter map differ. The
+PID→model table in [`atf_dsp/models.py`](atf_dsp/models.py) covers the current
+**MATCH / HELIX / BRAX** range (from the MATCH UP / M series through HELIX DSP /
+V-series to BRAX DSP), so any ACO device should enumerate and identify.
+
+Parameter maps are generated from the vendor `.at01` device file
+(`tools/build_param_maps.py`); **raw vendor files are never committed**. The
+repository ships a generated map for the **MATCH M 5.4DSP** only — for another
+model, point the tool at that model's `.at01` to build its map.
+
+## Hardware validation
+
+Development, and all hardware validation to date, has been against a **MATCH
+M 5.4DSP** (session dated 2026-08-26). Because the DSP round-trip is lossy by
+construction, validation runs in two directions with tolerance-aware
+comparisons — the runbook is
+[docs/hardware-validation.md](docs/hardware-validation.md):
+
+- **SDK writes → SDK reads** on the real amp — proves writes persist, that
+  encode/decode are inverse, and that the firmware SafeLoad path works on
+  silicon.
+- **PC-Tool writes → SDK reads** from a PC-Tool-authored `.pct6` — the PC-Tool
+  is the only independent oracle, so this proves the encoders are *semantically*
+  correct, not merely self-consistent.
+
+Confirmed on hardware (no `unsafe=True` required):
+
+| Area | Status |
+|------|--------|
+| 8.24 fixed-point · gain (dB) · mute | confirmed |
+| Delay (integer samples, fs = 48 kHz) | confirmed |
+| EQ (RBJ biquad bands) | confirmed |
+| Crossover — Butterworth / Linkwitz-Riley at 12 & 24 dB | confirmed |
+| Routing (both matrices; linear mix gains) | confirmed |
+
+Not yet validated (gated / provisional):
+
+- **Polarity** — the `INV{letter}` cell is confirmed, but its ±1.0
+  sign-multiplier encoding is unvalidated; gated behind `unsafe=True`.
+- **Crossover** characteristics/slopes beyond the above (e.g. **Bessel**, 6/18
+  dB per octave) are not yet mapped.
+- **Input Signal Analyzer** — the exact readback cell set and polling cadence
+  still need a live capture to confirm.
+
+Only the MATCH M 5.4DSP has been exercised on real silicon; other ACO models
+share the firmware and encoders but have not been individually hardware-tested.
 
 ## Tests
 
@@ -112,6 +187,20 @@ crossover, and routing. Wrong values can **damage speakers** or clip amp
 output. Value encoders that have not been round-tripped against real hardware
 are gated behind `unsafe=True`. Do not disable those gates casually. When
 tuning by ear, keep amp gain low until you know what a change does.
+
+## Built with AI assistance
+
+This project was built **almost entirely with AI assistance**. The protocol
+reverse-engineering, the encoders, the channel model, the test suite, and this
+documentation were largely produced by working with AI coding tools. The human
+author's role has been to direct that work, provide the hardware, and — crucially
+— perform the **on-amp validation the AI cannot**: every "confirmed" claim in
+[Hardware validation](#hardware-validation) was checked against a real MATCH
+M 5.4DSP and the vendor PC-Tool.
+
+Read the code with that in mind: it is functional and hardware-validated where
+noted, but review it before trusting it near equipment you care about, and
+respect the `unsafe=True` gates on anything not yet confirmed.
 
 ## License
 
