@@ -141,15 +141,19 @@ separately.) `tools/build_param_maps.py` inflates an `.at01` and writes the
 `{name: address}` JSON; **only the generated JSON is committed, never the raw
 `.at01`.**
 
-The repository ships a generated map for the **MATCH M 5.4DSP** only — the model
-that has been hardware-validated. Maps for the other ACO models can be generated
-identically from the same PC-Tool install (the shipped `model_topology.json`,
-which covers 32 models, was itself built by scanning those device files). They
-are not shipped by default only to keep the package small and to avoid implying
-validated support for models exercised on paper alone — generating them is no
-different from the map that already ships.
+The repository ships generated maps for **all 32 ACO models** in the
+`MODEL_AT01` table (`atf_dsp/data/*.json`), so any of them can be addressed by
+parameter name out of the box — `Device.connect()` picks the right map from the
+USB PID automatically. These are generated `{name: address}` artifacts, not raw
+vendor files. **Only the MATCH M 5.4DSP has been hardware-validated**, however;
+every other map is derived from its vendor device file and is *expected* to work
+(shared firmware and encoders) but is unverified on real hardware — treat it
+accordingly (see the caveat below).
 
-### Adding another model
+### Regenerating or adding a model
+
+The shipped maps can be rebuilt from your own PC-Tool install (e.g. after a
+PC-Tool update, or to add a model not yet in `MODEL_AT01`):
 
 1. Find the model's `.at01` in your DSP PC-Tool install
    (`.../app/deviceFiles/`), e.g. `HelixDSP3.at01`. The basename must match the
