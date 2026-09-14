@@ -30,10 +30,11 @@ HALF = 0x00800000  # 0.5 in 8.24 → -6.02 dBFS
 class FakeDevice:
     """Minimal Device stand-in keyed by param NAME (what analyzer passes)."""
 
-    def __init__(self, reads=None):
+    def __init__(self, reads=None, fs=48000):
         # reads: {name: bytes}  (constant per name)
         self.reads = dict(reads or {})
         self.writes = []  # list of (name, bytes, safeload)
+        self.fs = fs      # analyzer defaults its bandpass fs to the device rate
 
     def read_param(self, name, nbytes=4):
         return self.reads.get(name, b"\x00\x00\x00\x00")[:nbytes]

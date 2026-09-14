@@ -75,40 +75,44 @@ class Controls:
         raw = MUTE_RAW if muted else UNMUTE_RAW
         return self._write_word(self._addr(target), raw)
 
+    def _fs(self, fs: Optional[int]) -> int:
+        """Resolve the sample rate: an explicit *fs* wins; otherwise the bound device's
+        model rate (48 kHz for MATCH/HELIX, 96/192 kHz for BRAX)."""
+        return self.device.fs if fs is None else fs
+
     # -- delay (hypothesis -> gated) --------------------------------------
-    def set_delay(self, target: AddrOrName, ms: float, fs: int = encoding.DEFAULT_FS,
+    def set_delay(self, target: AddrOrName, ms: float, fs: Optional[int] = None,
                   unsafe: bool = False) -> bytes:
         """Set a time-alignment delay (ms -> integer sample count, 32.0 format).
 
-        Gated: protocol.yaml.encoders.delay is status 'hypothesis' (internal fs and
-        cell semantics need hardware); pass unsafe=True to write anyway.
+        *fs* defaults to the device's processing rate, so the sample count is correct for
+        96/192 kHz firmware, not just 48 kHz.
         """
         self._require_confirmed("delay", unsafe)
-        raw = encoding.delay_ms_to_samples(ms, fs=fs)
+        raw = encoding.delay_ms_to_samples(ms, fs=self._fs(fs))
         return self._write_word(self._addr(target), raw)
 
     # -- EQ band (confirmed) ----------------------------------------------
     def set_eq_band(self, base: AddrOrName, f0: float, q: float, gain_db: float,
-                    kind: str = "peaking", fs: int = encoding.DEFAULT_FS) -> bytes:
+                    kind: str = "peaking", fs: Optional[int] = None) -> bytes:
         """Write one EQ band's 5 biquad coefficients [B2,B1,B0,A2,A1] atomically.
 
         *base* is the address (or name) of the first coefficient (STAGE..._B2); the
         remaining four live at consecutive addresses. All five are written in a single
-        SafeLoad burst so the change is glitch-free.
+        SafeLoad burst so the change is glitch-free. *fs* defaults to the device rate.
         """
         base_addr = self._addr(base)
-        coeffs = encoding.biquad_rbj(kind, f0, q, gain_db, fs=fs)
+        coeffs = encoding.biquad_rbj(kind, f0, q, gain_db, fs=self._fs(fs))
         return self._write_words(base_addr, coeffs)
 
     # -- crossover / routing (hypothesis -> gated) ------------------------
     def set_crossover(self, base: AddrOrName, f0: float, q: float = 0.7071,
-                      kind: str = "lowpass", fs: int = encoding.DEFAULT_FS,
+                      kind: str = "lowpass", fs: Optional[int] = None,
                       unsafe: bool = False) -> bytes:
-        """Write a single crossover biquad stage. Gated: encoders.crossover is
-        status 'hypothesis' (per-slope stage mapping needs a capture)."""
+        """Write a single crossover biquad stage. *fs* defaults to the device rate."""
         self._require_confirmed("crossover", unsafe)
         base_addr = self._addr(base)
-        coeffs = encoding.biquad_rbj(kind, f0, q, 0.0, fs=fs)
+        coeffs = encoding.biquad_rbj(kind, f0, q, 0.0, fs=self._fs(fs))
         return self._write_words(base_addr, coeffs)
 
     def bypass_crossover(self, base: AddrOrName, unsafe: bool = False) -> bytes:

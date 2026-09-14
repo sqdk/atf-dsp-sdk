@@ -43,6 +43,68 @@
    "rows": 14
   }
  },
+ "BRAX DSP (96 kHz)": {
+  "complete": false,
+  "eq_blocks": {
+   "EQ1": {
+    "bands": 15,
+    "instances": 6
+   },
+   "EQ2": {
+    "bands": 16,
+    "instances": 6
+   }
+  },
+  "inputs": {
+   "count": 0,
+   "eq_bands": 16,
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "outputs": {
+   "count": 0,
+   "delay_letters": [],
+   "letters": [],
+   "mute_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "xover_letters": []
+  },
+  "param_count": 4259,
+  "roles": {
+   "gain_role_prefixes": [
+    "FRONT",
+    "REAR"
+   ],
+   "global_eq_zones": [
+    "CENTER_FRONT",
+    "CENTER_REAR",
+    "FRONT",
+    "REAR",
+    "SUB"
+   ]
+  },
+  "routing_matrix": {
+   "cells": 444,
+   "cols": 14,
+   "orientation": "rows x cols (provisional: rows=outputs, cols=virtual)",
+   "rows": 14
+  }
+ },
  "HELIX AMPLIFY 206 DSP": {
   "complete": true,
   "eq_blocks": {

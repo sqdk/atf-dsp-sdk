@@ -141,14 +141,40 @@ separately.) `tools/build_param_maps.py` inflates an `.at01` and writes the
 `{name: address}` JSON; **only the generated JSON is committed, never the raw
 `.at01`.**
 
-The repository ships generated maps for **all 32 ACO models** in the
-`MODEL_AT01` table (`atf_dsp/data/*.json`), so any of them can be addressed by
-parameter name out of the box — `Device.connect()` picks the right map from the
-USB PID automatically. These are generated `{name: address}` artifacts, not raw
-vendor files. **Only the MATCH M 5.4DSP has been hardware-validated**, however;
-every other map is derived from its vendor device file and is *expected* to work
-(shared firmware and encoders) but is unverified on real hardware — treat it
-accordingly (see the caveat below).
+The repository ships generated maps for **every model in the `MODEL_AT01`
+table** — the full MATCH / HELIX / BRAX range, including both BRAX firmware rates
+(`atf_dsp/data/*.json`), so any of them can be addressed by parameter name out of
+the box; `Device.connect()` picks the right map from the USB PID automatically.
+These are generated `{name: address}` artifacts, not raw vendor files. **Only the
+MATCH M 5.4DSP has been hardware-validated**, however; every other map is derived
+from its vendor device file and is *expected* to work (shared firmware and
+encoders) but is unverified on real hardware — treat it accordingly (see the
+caveats below).
+
+### Sample rate (48 / 96 / 192 kHz)
+
+Every frequency- or time-domain conversion — delay (ms → samples), EQ and
+crossover biquads, the phase all-pass, and the analyzer's swept bandpass —
+depends on the DSP's processing rate. The SDK derives that rate from the
+**connected model** and feeds it to all of these encoders automatically:
+
+- The MATCH / HELIX line runs at **48 kHz**.
+- **BRAX** ships two firmware images under one USB PID: `Device.connect()`
+  resolves it to the **192 kHz** default (`"BRAX DSP"`); select the **96 kHz**
+  image explicitly with `Device.connect(model="BRAX DSP (96 kHz)")` (or
+  `--model "BRAX DSP (96 kHz)"` on the CLI), since the PID alone can't tell the
+  two rates apart.
+
+`device.fs` exposes the resolved rate and `device.fs_confirmed` says whether it's
+trustworthy (an explicit entry, or a rate named by the device file) versus the
+48 kHz fallback assumed for a model with no rate signal. Any rate-dependent call
+also takes an explicit `fs=` override.
+
+> **48 kHz is the only rate hardware-validated** (MATCH M 5.4DSP). 96 / 192 kHz
+> operation is correct *by construction* — the encoders share one fixed-point
+> math and now use the device's rate — but has not been verified on a real BRAX.
+> The one residual assumption is that the DSP applies these parameter blocks at
+> the rate named by its device file; read back what you write before trusting it.
 
 ### Regenerating or adding a model
 

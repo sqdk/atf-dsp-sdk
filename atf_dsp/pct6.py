@@ -597,7 +597,7 @@ def _read_eq_bands_xml(device: "Device", resolve, count: int,
         default_f = float(freqs[i]) if i < len(freqs) else 1000.0
         # classify peaking vs low/high-shelf (fixes the from_device/dsp_web bug where a shelf was
         # force-fit as a wrong peaking band — hardware-confirmed 2026-08-30).
-        rec = encoding.eq_band_from_coeffs(words) if len(words) == 5 else None
+        rec = encoding.eq_band_from_coeffs(words, fs=device.fs) if len(words) == 5 else None
         if rec is None:  # bypassed / flat / uninitialised
             kind, f, q, g, byp = "peaking", default_f, 4.318, 0.0, 1
         else:
@@ -902,7 +902,7 @@ def plan_setup_writes(device: "Device", setup: Setup):
                 continue
             try:
                 ref = target.resolve_eq_band(i)
-                coeffs = encoding.biquad_rbj("peaking", band.freq, band.q, band.gain_db)
+                coeffs = encoding.biquad_rbj("peaking", band.freq, band.q, band.gain_db, fs=device.fs)
                 writes.append((ref.base, b"".join(encoding.to_bytes_be(c) for c in coeffs)))
             except (ChannelModelError, ValueError):
                 skipped += 1

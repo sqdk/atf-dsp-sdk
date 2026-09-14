@@ -170,15 +170,16 @@ class InputAnalyzer:
             raw = encoding.UNITY if i in taps else 0
             self.device.write_param(name, encoding.to_bytes_be(raw), safeload=True)
 
-    def tune(self, f0: float, q: float = DEFAULT_Q, fs: int = DEFAULT_FS) -> None:
+    def tune(self, f0: float, q: float = DEFAULT_Q, fs: Optional[int] = None) -> None:
         """Retune the analysis bandpass to *f0* (writes the 5 INPUTRTAFILTER1 target coeffs in
-        one SafeLoad burst). Un-gated; centring hardware-confirmed 2026-08-29."""
-        coeffs = bandpass_coeffs(f0, q=q, fs=fs)
+        one SafeLoad burst). Un-gated; centring hardware-confirmed 2026-08-29. *fs* defaults to
+        the device's processing rate so the bandpass centres correctly on 96/192 kHz firmware."""
+        coeffs = bandpass_coeffs(f0, q=q, fs=self.device.fs if fs is None else fs)
         data = b"".join(encoding.to_bytes_be(c) for c in coeffs)
         self.device.write_param(FILTER1_TARGB2_BASE, data, safeload=True)
 
     def sweep(self, freqs: Optional[Sequence[float]] = None, *, q: float = DEFAULT_Q,
-              fs: int = DEFAULT_FS, settle: Optional[float] = None, floor: float = DBFS_FLOOR,
+              fs: Optional[int] = None, settle: Optional[float] = None, floor: float = DBFS_FLOOR,
               input_channel: Optional[int] = None,
               sleep=time.sleep) -> Spectrum:
         """Full swept spectrum: for each frequency, retune the bandpass, wait, read RBINPUTRTA1.

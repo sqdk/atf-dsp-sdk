@@ -78,9 +78,13 @@ PID_MODELS = {
 }
 
 # model name -> device-file (.at01) basename. This basename is also the generated
-# JSON basename under atf_dsp/data/. BRAX ships two rates; default to 192 kHz.
+# JSON basename under atf_dsp/data/. BRAX ships two firmware rates as two device files
+# under a single USB PID (0x3000): "BRAX DSP" is the 192 kHz image that PID auto-detect
+# resolves to, and "BRAX DSP (96 kHz)" is the 96 kHz image, a rate variant selected
+# explicitly by name (there is no distinct PID to tell them apart).
 MODEL_AT01 = {
     "BRAX DSP": "BraxDSP192kHz",
+    "BRAX DSP (96 kHz)": "BraxDSP96kHz",
     "HELIX DSP MINI": "HelixDSPMini",
     "HELIX DSP MINI MK2": "HelixDSPMiniMK2",
     "HELIX DSP.3": "HelixDSP3",
@@ -141,25 +145,45 @@ DEV_IDS = {
 # Models whose control semantics have been validated on real silicon.
 HARDWARE_CONFIRMED = frozenset({"MATCH M 5.4DSP"})
 
-# Nominal DSP sample rate (Hz) where known/confirmed. The whole ACO/MATCH line runs at
-# 48 kHz; BRAX ships multi-rate firmware (the .at01 basename carries the rate). Absent an
-# entry here, fs is derived from the .at01 basename (…96kHz/…192kHz) else assumed 48 kHz
-# UNCONFIRMED. The SDK's fluent encoders assume 48 kHz — see model_info()['warnings'].
+# Fallback processing rate when nothing more specific is known.
+DEFAULT_FS = 48000
+
+# Nominal DSP processing rate (Hz). The whole MATCH / HELIX line runs at 48 kHz; BRAX ships
+# multi-rate firmware whose rate is carried in the .at01 basename (…96kHz/…192kHz).
+# Resolution order (see _fs_for): an explicit MODEL_FS entry -> a kHz suffix in the model's
+# .at01 basename -> 48 kHz assumed (UNCONFIRMED) for a known model. The SDK feeds this rate
+# to its encoders, so EQ/crossover/delay/analyzer math tracks the device.
 MODEL_FS: Dict[str, int] = {
     "MATCH M 5.4DSP": 48000,   # bench-confirmed
 }
 
+# basename (.at01 / JSON) -> model display name, so fs resolves from either spelling.
+_MODEL_FOR_AT01: Dict[str, str] = {v: k for k, v in MODEL_AT01.items()}
+
 
 def _fs_for(model: Optional[str]) -> tuple[Optional[int], bool]:
-    """(sample_rate_hz, confirmed). Explicit map wins; else parse a kHz suffix from the
-    .at01 basename (e.g. BraxDSP192kHz); else assume 48000 UNCONFIRMED."""
-    if model in MODEL_FS:
-        return MODEL_FS[model], True
-    basename = MODEL_AT01.get(model or "", "")
-    m = re.search(r"(\d+)kHz", basename)
+    """(processing_rate_hz, confirmed) for a model given by DISPLAY NAME or .at01 BASENAME.
+
+    An explicit MODEL_FS entry wins; else a ``<n>kHz`` suffix in the .at01 basename (e.g.
+    ``BraxDSP192kHz``) is taken as confirmed; else a known model is assumed 48 kHz
+    (UNCONFIRMED); else ``(None, False)``."""
+    if model is None:
+        return (None, False)
+    display = model if model in MODEL_AT01 else _MODEL_FOR_AT01.get(model)
+    if display and display in MODEL_FS:
+        return (MODEL_FS[display], True)
+    basename = MODEL_AT01.get(model) or (model if model in _MODEL_FOR_AT01 else None)
+    m = re.search(r"(\d+)kHz", basename or model)
     if m:
-        return int(m.group(1)) * 1000, True
-    return (48000, False) if model in MODEL_AT01 else (None, False)
+        return (int(m.group(1)) * 1000, True)
+    return (DEFAULT_FS, False) if (display or model in _MODEL_FOR_AT01) else (None, False)
+
+
+def model_fs(model: Optional[str]) -> int:
+    """Processing rate in Hz for a model (display name or .at01 basename), always an int —
+    falls back to :data:`DEFAULT_FS` when the model is unknown."""
+    fs, _ = _fs_for(model)
+    return fs or DEFAULT_FS
 
 
 def has_param_map(model: Optional[str]) -> bool:
@@ -227,8 +251,9 @@ def model_info(model_or_pid) -> Dict:
                 "silicon. Treat any write as EXPERIMENTAL.")
         if fs_hz and fs_hz != 48000:
             warnings.append(
-                f"Sample rate {fs_hz} Hz: the SDK's fluent encoders assume 48 kHz, so EQ/crossover/"
-                "delay/analyzer frequencies will be off by fs/48000 unless fs is passed explicitly.")
+                f"Sample rate {fs_hz} Hz (non-48 kHz): the SDK feeds this rate to its EQ/crossover/"
+                f"delay/analyzer encoders, but only the MATCH M 5.4DSP (48 kHz) is hardware-verified"
+                f" — treat {fs_hz} Hz operation as unverified.")
         if not fs_conf:
             warnings.append(f"Sample rate for {name} is assumed 48 kHz but NOT confirmed.")
         if topo is None:

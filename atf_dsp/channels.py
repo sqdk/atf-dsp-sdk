@@ -32,6 +32,7 @@ import yaml
 from atf_dsp import encoding
 from atf_dsp.controls import Controls, NotConfirmedError
 from atf_dsp.encoding import EQ_STORAGE_ORDER
+from atf_dsp.models import model_fs
 from atf_dsp.params import ParamMap
 
 # discover() is the single source of structural truth — never re-implement it here.
@@ -458,7 +459,7 @@ class OutputChannel(_GraphicEqMixin, _Channel):
             data = dev.read_param(self._model._resolve_output_xover(self.letter, st).name, nbytes=20)
             words = [int.from_bytes(data[j:j + 4], "big") for j in range(0, min(len(data), 20), 4)]
             if len(words) == 5 and encoding.is_allpass(words):
-                return -encoding.allpass_phase_deg(words, ref)     # report positive magnitude
+                return -encoding.allpass_phase_deg(words, ref, fs=self._model.fs)  # positive magnitude
         return 0.0
 
     def phase(self, degrees: float, ref_hz: Optional[float] = None,
@@ -469,7 +470,7 @@ class OutputChannel(_GraphicEqMixin, _Channel):
         if ref is None:
             raise ChannelModelError("phase() needs a crossover reference frequency (set a "
                                     "crossover first, or pass ref_hz=)")
-        coeffs = encoding.allpass_biquad(degrees, ref)
+        coeffs = encoding.allpass_biquad(degrees, ref, fs=self._model.fs)
         ctrls = self._controls()
         ctrls._write_words(self.resolve_phase(stage).base_addr, coeffs)
         return self
@@ -484,8 +485,9 @@ class OutputChannel(_GraphicEqMixin, _Channel):
         return None
 
     def delay_ms(self, ms: float, unsafe: bool = False) -> "OutputChannel":
-        # Delay is hardware-confirmed (fs=48k, integer samples) -> not gated. `unsafe` kept for
-        # API symmetry (ignored while status is 'confirmed').
+        # Delay is hardware-confirmed (integer samples) -> not gated. `unsafe` kept for API
+        # symmetry (ignored while status is 'confirmed'). set_delay uses the device's fs, so the
+        # sample count is correct for 96/192 kHz firmware, not just 48 kHz.
         self._controls().set_delay(self.resolve_delay().name, ms, unsafe=unsafe)
         return self
 
@@ -551,7 +553,7 @@ class OutputChannel(_GraphicEqMixin, _Channel):
         self.crossover_section("lowpass", lp, characteristic, slope, unsafe=unsafe)
         return self
 
-    def recover_crossover(self, fs: int = 48000) -> Dict[str, "CrossoverRecovery"]:
+    def recover_crossover(self, fs: Optional[int] = None) -> Dict[str, "CrossoverRecovery"]:
         """Read this output's crossover back off the DSP FILTERS stages and RECOVER, per
         section, a best-effort corner frequency + slope + characteristic.
 
@@ -571,6 +573,8 @@ class OutputChannel(_GraphicEqMixin, _Channel):
         dev = self._model.device
         if dev is None:
             raise ChannelModelError("recover_crossover needs a Device")
+        if fs is None:
+            fs = self._model.fs
         out: Dict[str, CrossoverRecovery] = {}
         for kind in ("highpass", "lowpass"):
             actives: List[tuple] = []
@@ -578,7 +582,7 @@ class OutputChannel(_GraphicEqMixin, _Channel):
                 ref = self.resolve_crossover(kind, pos)
                 data = dev.read_param(ref.base, nbytes=20)
                 words = [int.from_bytes(data[j:j + 4], "big") for j in range(0, min(len(data), 20), 4)]
-                rec = encoding.lphp_corner_from_coeffs(words) if len(words) == 5 else None
+                rec = encoding.lphp_corner_from_coeffs(words, fs=fs) if len(words) == 5 else None
                 if rec is not None:
                     actives.append(rec)
             if not actives:
@@ -898,6 +902,15 @@ class ChannelModel:
         if self.device is None:
             raise ChannelModelError("this operation needs a Device (pass device= to ChannelModel.load)")
         return Controls(self.device)
+
+    @property
+    def fs(self) -> int:
+        """DSP processing rate (Hz) used by the fluent encoders — the device's rate when
+        connected, otherwise derived from the model's .at01 basename (48 kHz default). This is
+        what makes EQ/crossover/delay/phase math track 96/192 kHz firmware."""
+        if self.device is not None:
+            return self.device.fs
+        return model_fs(self.model_name)
 
     # -- topology accessors ----------------------------------------------
     @property

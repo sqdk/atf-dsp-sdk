@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
 from atf_dsp import protocol
-from atf_dsp.models import at01_for_model, model_for_pid
+from atf_dsp.models import at01_for_model, model_for_pid, model_fs, _fs_for
 from atf_dsp.params import ParamMap
 from atf_dsp.protocol import Protocol
 from atf_dsp.transport import Link
@@ -108,6 +108,20 @@ class Device:
 
     def __exit__(self, exc_type, exc, tb) -> None:
         self.close()
+
+    # -- processing sample rate -------------------------------------------
+    @property
+    def fs(self) -> int:
+        """The DSP processing rate (Hz) for the loaded model. The SDK feeds this to its
+        encoders so EQ/crossover/delay math tracks the device (48 kHz for the MATCH/HELIX
+        line; 96/192 kHz for BRAX firmware). Falls back to 48 kHz for an unknown model."""
+        return model_fs(self.model_name)
+
+    @property
+    def fs_confirmed(self) -> bool:
+        """True when :attr:`fs` is trustworthy (an explicit table entry or a rate carried in
+        the .at01 basename), False when it is the assumed-48 kHz fallback."""
+        return _fs_for(self.model_name)[1]
 
     # -- channel model (lazy) ---------------------------------------------
     @property
