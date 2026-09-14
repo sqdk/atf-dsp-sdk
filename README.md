@@ -66,6 +66,7 @@ atf-dsp-sdk set-setup 3                # clean switch (no mute); add --dry-run t
 atf-dsp-sdk read MOD_VOLUME_READBACK_VOLRB_READBACK_READBACKALGNEWSIGMA3005VALUE
 atf-dsp-sdk write 0x11F8 00400000 --dry-run
 atf-dsp-sdk write <PARAM_NAME> 00400000 --dry-run --model "MATCH M 5.4DSP"
+atf-dsp-sdk validate --json report.json   # read-only device validation (see below)
 ```
 
 ## Quickstart — library
@@ -248,6 +249,22 @@ Not yet fully validated:
 
 Only the MATCH M 5.4DSP has been exercised on real silicon; other ACO models
 share the firmware and encoders but have not been individually hardware-tested.
+
+### Help validate your device
+
+If you own another ACO amp you can help confirm it — no coding required. The
+`atf-dsp-sdk validate` command runs the harness and writes a submittable report;
+it is **read-only by default**, with an opt-in, snapshot/restored write test.
+
+```bash
+atf-dsp-sdk validate --json report.json          # read-only: identify + read-back probe
+atf-dsp-sdk validate --pct6 oracle.pct6 --json report.json   # PC-Tool oracle (safe, no writes)
+atf-dsp-sdk validate --write --json report.json  # gated write→read test (speakers off!)
+```
+
+Full procedure, safety notes, and how to submit a result:
+[docs/validating-your-device.md](docs/validating-your-device.md). Current
+coverage: [docs/validation-status.md](docs/validation-status.md).
 
 ## Tests
 

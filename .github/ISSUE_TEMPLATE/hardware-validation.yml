@@ -1,0 +1,57 @@
+name: Hardware validation report
+description: Report the result of running `atf-dsp-sdk validate` against a real amplifier.
+title: "[HW] <model> — validation report"
+labels: ["hardware-validation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping validate hardware! See
+        [docs/validating-your-device.md](../blob/main/docs/validating-your-device.md)
+        for the procedure. **Safety:** the write test can be loud — keep amp gain
+        down or speakers disconnected, and use a scratch setup slot.
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      description: e.g. "HELIX DSP.3" — as shown in the report / PC-Tool.
+      placeholder: HELIX DSP.3
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware version
+      placeholder: (from the report's device.firmware, or the PC-Tool)
+    validations:
+      required: false
+  - type: checkboxes
+    id: steps
+    attributes:
+      label: Which checks did you run?
+      options:
+        - label: Read-only probe (device enumerates, map loads, cells read back)
+        - label: Direction A — PC-Tool `.pct6` oracle (semantic check, no amp writes)
+        - label: Direction B — SDK write→read test (gated; snapshot/restored)
+  - type: textarea
+    id: report
+    attributes:
+      label: report.json
+      description: Paste the full contents of the report.json produced by `--json`.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: observations
+    attributes:
+      label: Observations
+      description: Anything unexpected — failed controls, odd sounds, crashes, sample-rate notes.
+    validations:
+      required: false
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety
+      options:
+        - label: If I ran the write test, amp gain was down / speakers disconnected and I used a scratch setup slot.
+          required: true

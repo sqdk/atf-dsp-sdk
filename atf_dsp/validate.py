@@ -326,6 +326,117 @@ class Report:
             raise AssertionError(self.summary())
         return self
 
+    def to_dict(self) -> dict:
+        """JSON-serialisable form of this report (for submittable validation reports)."""
+        return {
+            "direction": self.direction,
+            "ok": self.ok,
+            "passed": self.passed,
+            "failed": self.failed,
+            "total": len(self.checks),
+            "checks": [
+                {"control": c.control, "ok": c.ok,
+                 "expected": _jsonable(c.expected), "actual": _jsonable(c.actual),
+                 "detail": c.detail}
+                for c in self.checks
+            ],
+            "skipped": list(self.skipped),
+        }
+
+
+def _jsonable(v: Any):
+    """Coerce a check's expected/actual value to something json.dumps can handle."""
+    if isinstance(v, (str, int, bool)) or v is None:
+        return v
+    if isinstance(v, float):
+        return round(v, 6)
+    if isinstance(v, (list, tuple)):
+        return [_jsonable(x) for x in v]
+    if isinstance(v, dict):
+        return {str(k): _jsonable(x) for k, x in v.items()}
+    return str(v)
+
+
+def report_envelope(device, reports: List[Report], *, notes: str = "") -> dict:
+    """Assemble a submittable hardware-validation report: environment metadata (SDK version,
+    model, firmware, sample rate, platform, timestamp) plus one or more :class:`Report`s.
+
+    Read-only — it only *reads* identity from the device. Feed the result to ``json.dumps``."""
+    import datetime
+    import platform as _platform
+
+    from atf_dsp import __version__ as sdk_version
+
+    model = getattr(device, "model_name", None)
+    firmware = None
+    try:
+        ident = device.identify()
+        firmware = getattr(ident, "firmware", None)
+        model = model or getattr(ident, "model", None)
+    except Exception:  # identity is best-effort metadata, never fatal to a report
+        pass
+
+    info: dict = {}
+    try:
+        from atf_dsp.models import model_info
+        info = model_info(model) if model else {}
+    except Exception:
+        info = {}
+
+    reports = list(reports)
+    return {
+        "schema": "atf-dsp-sdk/hw-validation/1",
+        "sdk_version": sdk_version,
+        "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "platform": _platform.platform(),
+        "device": {
+            "model": model,
+            "pid": info.get("pid"),
+            "firmware": firmware,
+            "fs_hz": getattr(device, "fs", None),
+            "fs_confirmed": getattr(device, "fs_confirmed", None),
+            "has_channel_model": info.get("has_channel_model"),
+            "hardware_confirmed": info.get("hardware_confirmed"),
+        },
+        "reports": [r.to_dict() for r in reports],
+        "all_ok": (all(r.ok for r in reports) if reports else None),
+        "notes": notes or "",
+    }
+
+
+def format_test_vector(vector: "TestVector") -> str:
+    """Human-readable dump of the deterministic test vector — the exact values to enter by hand
+    in the DSP PC-Tool for the Direction A (PC-Tool oracle) leg. Frequencies in Hz, gains in dB."""
+    lines: List[str] = [f"Test vector (fs = {vector.fs} Hz) — enter these in the PC-Tool, then Save As .pct6:"]
+    lines.append("\nOUTPUTS")
+    for o in vector.outputs:
+        pol = " INVERTED" if o.polarity else ""
+        state = "MUTE" if o.mute else f"{o.gain_db:+.2f} dB{pol}"
+        lines.append(f"  Output {o.letter}: {state}, delay {o.delay_ms:.3f} ms")
+        for b in o.eq:
+            lines.append(f"      EQ band {b.band}: {b.f:.1f} Hz  Q {b.q:.2f}  {b.gain_db:+.2f} dB ({b.kind})")
+        if o.crossover:
+            xo = o.crossover
+            hp = f"HP {xo.hp:.1f} Hz" if xo.hp else "HP off"
+            lp = f"LP {xo.lp:.1f} Hz" if xo.lp else "LP off"
+            lines.append(f"      Crossover: {hp}, {lp}, {xo.characteristic} {xo.slope} dB/oct")
+    lines.append("\nVIRTUAL (tuning) CHANNELS")
+    for v in vector.virtuals:
+        state = "MUTE" if v.mute else f"{v.gain_db:+.2f} dB"
+        lines.append(f"  Virtual {v.key}: {state}")
+        for b in v.eq:
+            lines.append(f"      EQ band {b.band}: {b.f:.1f} Hz  Q {b.q:.2f}  {b.gain_db:+.2f} dB")
+    lines.append("\nINPUTS")
+    for i in vector.inputs:
+        lines.append(f"  Input {i.letter}:")
+        for b in i.eq:
+            lines.append(f"      EQ band {b.band}: {b.f:.1f} Hz  Q {b.q:.2f}  {b.gain_db:+.2f} dB")
+    if vector.routes:
+        lines.append("\nROUTING (matrix cells, dB)")
+        for r in vector.routes:
+            lines.append(f"  {r.matrix}[row {r.row}][col {r.col}] = {r.gain_db:+.2f} dB")
+    return "\n".join(lines)
+
 
 # ---------------------------------------------------------------------------
 # small readback decoders

@@ -44,6 +44,8 @@ from atf_dsp.validate import (
     build_test_vector,
     exercise_all,
     assert_matches_pct6,
+    report_envelope,
+    format_test_vector,
 )
 
 __all__ = [
@@ -89,4 +91,6 @@ __all__ = [
     "build_test_vector",
     "exercise_all",
     "assert_matches_pct6",
+    "report_envelope",
+    "format_test_vector",
 ]

@@ -92,6 +92,77 @@ def cmd_write(args: argparse.Namespace) -> int:
     return 0
 
 
+def _readonly_probe(dev) -> "object":
+    """A no-write reachability + read/decode smoke test: identify, current setup, and each
+    output's current gain (exercises the read + decode path without changing anything)."""
+    from atf_dsp.validate import Report
+    rep = Report(direction="Read-only probe (no writes)")
+    try:
+        ident = dev.identify()
+        rep.add("identify", bool(ident), "response", getattr(ident, "firmware", "ok") or "ok")
+    except Exception as exc:  # noqa: BLE001 - report, don't crash the probe
+        rep.add("identify", False, "response", f"error: {exc}")
+    try:
+        rep.add("get-setup", True, "1..N", dev.get_setup())
+    except Exception as exc:  # noqa: BLE001
+        rep.add("get-setup", False, "1..N", f"error: {exc}")
+    try:
+        for letter in dev.model.output_letters:
+            g = dev.model.output(letter).gain_db()
+            rep.add(f"read output {letter} gain", True, "dB or muted",
+                    "muted/0 dB" if g is None else round(g, 2))
+    except Exception as exc:  # noqa: BLE001
+        rep.add("read output gains", False, "dB", f"error: {exc}")
+    return rep
+
+
+def cmd_validate(args: argparse.Namespace) -> int:
+    import json
+
+    from atf_dsp import validate
+
+    with Device.connect(port=args.port, model=args.model, verbose=args.verbose) as dev:
+        if args.print_vector:
+            print(validate.format_test_vector(validate.build_test_vector(dev.model)))
+            return 0
+
+        reports = []
+        # Direction A — PC-Tool oracle (offline; never writes to the amp).
+        if args.pct6:
+            vec = validate.build_test_vector(dev.model)
+            reports.append(validate.assert_matches_pct6(args.pct6, vec))
+
+        # Direction B — SDK write -> SDK read. Opt-in only; snapshots + restores every cell.
+        if args.write:
+            print("\n*** WRITE TEST ***  This briefly writes a test tuning to a SCRATCH setup and "
+                  "restores every\ncell afterwards, but ANY write to a DSP can be loud. TURN AMP GAIN "
+                  "DOWN or DISCONNECT\nSPEAKERS first. Select a scratch setup slot (not your tune) "
+                  "before running.\n")
+            if not args.yes:
+                if input("Type WRITE to proceed (anything else aborts): ").strip() != "WRITE":
+                    print("aborted — no writes performed.")
+                    return 1
+            reports.append(validate.exercise_all(dev, snapshot=True))
+        elif not args.pct6:
+            reports.append(_readonly_probe(dev))
+
+        envelope = validate.report_envelope(dev, reports, notes=args.notes or "")
+
+    for rep in reports:
+        print(rep.summary())
+        print()
+    print(f"device : {envelope['device']['model']}  fw={envelope['device']['firmware']}  "
+          f"fs={envelope['device']['fs_hz']} Hz (confirmed={envelope['device']['fs_confirmed']})")
+    if args.json:
+        with open(args.json, "w") as fh:
+            json.dump(envelope, fh, indent=2)
+        print(f"\nwrote report -> {args.json}  (attach this to a hardware-validation issue)")
+    else:
+        print("\nre-run with --json report.json to save a submittable report; "
+              "--pct6 <file> adds the PC-Tool oracle check; --write runs the (gated) write test.")
+    return 0 if envelope["all_ok"] in (True, None) else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="atf-dsp-sdk", description="Audiotec Fischer ACO DSP control")
     ap.add_argument("--verbose", action="store_true", help="print TX/RX frames")
@@ -129,6 +200,19 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--direct", action="store_true", help="force direct write (flag 0xFF)")
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_write)
+
+    p = sub.add_parser("validate", help="run the hardware-validation harness and emit a report")
+    p.add_argument("--port")
+    p.add_argument("--model", help="force model (else auto-detected by USB PID)")
+    p.add_argument("--pct6", help="Direction A: a PC-Tool-authored .pct6 oracle to check our decode against")
+    p.add_argument("--write", action="store_true",
+                   help="Direction B: write a test tuning and read it back (snapshot/restored; GATED)")
+    p.add_argument("--yes", action="store_true", help="skip the write-test confirmation prompt")
+    p.add_argument("--print-vector", action="store_true",
+                   help="print the exact values to enter in the PC-Tool for the --pct6 leg, then exit")
+    p.add_argument("--json", help="write the submittable JSON report to this path")
+    p.add_argument("--notes", help="free-text notes to include in the report")
+    p.set_defaults(func=cmd_validate)
 
     return ap
 
