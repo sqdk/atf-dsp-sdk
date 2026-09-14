@@ -456,7 +456,7 @@ class OutputChannel(_GraphicEqMixin, _Channel):
         if ref is None:
             return None
         for st in _PHASE_STAGES:
-            data = dev.read_param(self._model._resolve_output_xover(self.letter, st).name, nbytes=20)
+            data = dev.read_param(self._model._resolve_output_xover(self.letter, st).base, nbytes=20)
             words = [int.from_bytes(data[j:j + 4], "big") for j in range(0, min(len(data), 20), 4)]
             if len(words) == 5 and encoding.is_allpass(words):
                 return -encoding.allpass_phase_deg(words, ref, fs=self._model.fs)  # positive magnitude

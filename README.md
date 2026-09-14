@@ -80,27 +80,74 @@ with Device.connect() as dev:                      # auto-detects by USB VID 0x2
     raw = dev.read_param("MOD_INPUTGAIN_ALG0_MUTE0")
 ```
 
-## Channel model
+## Examples
 
-A higher-level, data-driven abstraction over the raw params — inputs, virtual
-(tuning) channels, outputs, and the two routing matrices. See
-[docs/channels.md](docs/channels.md).
+The channel model is a data-driven abstraction over the raw params — inputs,
+virtual (tuning) channels, outputs, and the two routing matrices. The snippets
+below are runnable copies of the scripts in [`examples/`](examples/); **each runs
+with no hardware** (a memory-backed simulated amp), or against a real one by
+setting `ATF_DSP_SDK_HW=<port>`.
+
+**Tune one output end-to-end** — gain + polarity, crossover, delay, EQ, phase,
+all in one fluent chain ([`examples/tune_output.py`](examples/tune_output.py)):
 
 ```python
 from atf_dsp import Device
 
 with Device.connect() as dev:
-    dev.model.output("A").gain(-3).delay_ms(2.5)
-    dev.model.output("B").eq_band(3, f=1000, Q=1.0, gain_db=-3.0, kind="peaking")
-    dev.model.input("A").eq_band(0, f=120, Q=0.7, gain_db=+2.0)
+    (dev.model.output("A")
+        .gain(-3.0, inverted=True)                                    # -3 dB, polarity inverted
+        .crossover(hp=80, lp=2500, characteristic="linkwitz_riley", slope=24)
+        .delay_ms(1.5)                                                # fs-correct time-alignment
+        .eq_band(0, f=120, Q=0.7, gain_db=+2.0)
+        .phase(90, ref_hz=80))                                        # 90° all-pass at the xover
     dev.model.virtual("Subwoofer 1").eq_band(3, f=80, Q=1.0, gain_db=+2.0)
+```
+
+**Read the amp back** ([`examples/read_state.py`](examples/read_state.py)):
+
+```python
+out = dev.model.output("A")
+print(out.gain_db(), out.is_inverted())              # e.g. -6.0  True
+print(out.recover_crossover()["highpass"].corner_hz) # recovered from the biquad coeffs
+print(out.phase_deg())                               # recovered all-pass phase
+
+from atf_dsp import Setup
+setup = Setup.from_device(dev)                        # whole tune -> a portable object
+```
+
+**Routing matrices** ([`examples/routing.py`](examples/routing.py)):
+
+```python
+routing = dev.model.routing
+routing.virtual_to_output.set("A", "A", 0.0)   # Output A <- Virtual A at unity (row=out, col=virtual)
+routing.input_to_virtual.set("A", "A", 0.0)    # Virtual A <- Input A
+grid = routing.virtual_to_output.read(dev).as_grid()   # linear mix gains, 1.0 = unity
+```
+
+**Measure with the Input Signal Analyzer** ([`examples/analyzer_sweep.py`](examples/analyzer_sweep.py)):
+
+```python
+from atf_dsp import InputAnalyzer
+
+spectrum = InputAnalyzer(dev).sweep([50, 100, 250, 1000, 4000, 10000])
+print(spectrum.peak())                                # (freq_hz, level_dbfs)
+```
+
+**Apply a PC-Tool `.pct6` tune** (dry-run preview — nothing written)
+([`examples/apply_pct6.py`](examples/apply_pct6.py)):
+
+```python
+setup = Setup.load("tune.pct6")
+result = dev.apply_setup(setup, dry_run=True)
+print(result.writes, "writes planned,", result.skipped, "skipped")
 ```
 
 Canonical channel identity is the **letter** (`Output A`, `Virtual A`,
 `Input A`) — matching PC-Tool. Friendly names (`Front Left`) are per-setup
-overlay labels only, never an addressing key. Counts and shapes come from
-`tools/discover_channels.py` plus a per-model `.channels.yaml` overlay; nothing
-about the channel topology is hardcoded.
+overlay labels only, never an addressing key. Nothing about the channel topology
+is hardcoded — counts and shapes come from discovery plus a per-model
+`.channels.yaml` overlay.
 
 All typed value encoders — gain, mute, polarity, delay, EQ (peaking + shelves),
 crossover, phase, and routing — are hardware-confirmed against the MATCH M 5.4DSP

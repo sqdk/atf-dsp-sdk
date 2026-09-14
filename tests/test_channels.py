@@ -597,3 +597,12 @@ def test_builds_without_overlay(pm: ParamMap):
     assert model.input("A").resolve_eq_band(0).base in model.params
     with pytest.raises(ChannelModelError):
         model.output("A").resolve_eq_band(0)                  # unassigned without overlay
+
+
+def test_output_phase_write_read_roundtrip(pm):
+    """Guards the phase_deg() EqBandRef.base fix: write an all-pass phase, read it back."""
+    from atf_dsp.transport import Link
+    dev = Device(link=Link(dry_run=True, mem={}), param_map=pm, model="MATCH M 5.4DSP")
+    out = dev.model.output("A")
+    out.phase(60.0, ref_hz=100.0)
+    assert out.phase_deg(ref_hz=100.0) == pytest.approx(60.0, abs=2.0)
