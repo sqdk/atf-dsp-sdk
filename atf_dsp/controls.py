@@ -20,11 +20,6 @@ from atf_dsp.encoding import EQ_STORAGE_ORDER, UNITY
 MUTE_RAW = 0x00000000
 UNMUTE_RAW = UNITY  # 0x01000000
 
-# Per-output polarity / phase-invert (Helix "Polarity normal/inverted"). PROVISIONAL encoding:
-# a ±1.0 (8.24) sign multiplier — +1.0 normal, -1.0 inverted. UNVALIDATED on hardware.
-POLARITY_NORMAL_RAW = UNITY                       # +1.0  (0x01000000)
-POLARITY_INVERTED_RAW = encoding.to_fixed(-1.0)   # -1.0  (0xFF000000)
-
 
 class NotConfirmedError(RuntimeError):
     """Raised when a typed control whose contract status is not `confirmed` is used
@@ -78,23 +73,6 @@ class Controls:
     def set_mute(self, target: AddrOrName, muted: bool) -> bytes:
         """Mute (0x00000000) or unmute (0x01000000) a dedicated MUTE gain cell."""
         raw = MUTE_RAW if muted else UNMUTE_RAW
-        return self._write_word(self._addr(target), raw)
-
-    # -- polarity / phase invert (PROVISIONAL -> gated) -------------------
-    def set_polarity(self, target: AddrOrName, inverted: bool = True,
-                     unsafe: bool = False) -> bytes:
-        """Set a per-output polarity/phase-invert cell (Helix "Polarity normal/inverted").
-
-        PROVISIONAL encoding: a ±1.0 (8.24) sign multiplier (``+1.0`` normal / ``-1.0``
-        inverted). The cell is confirmed (``INV{letter}`` in the DELAY__PHASE_SWITCH module)
-        but this sign-multiplier assumption is UNVALIDATED on hardware, so the write is gated
-        behind ``unsafe=True``; readback-verify on a real amp before trusting it.
-        """
-        if not unsafe:
-            raise NotConfirmedError(
-                "polarity encoding is PROVISIONAL (assumed ±1.0 sign multiplier, unvalidated on "
-                "hardware); pass unsafe=True to write it anyway and readback-verify.")
-        raw = POLARITY_INVERTED_RAW if inverted else POLARITY_NORMAL_RAW
         return self._write_word(self._addr(target), raw)
 
     # -- delay (hypothesis -> gated) --------------------------------------

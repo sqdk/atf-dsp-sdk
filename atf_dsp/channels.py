@@ -56,11 +56,11 @@ _DEFAULT_TEMPLATES: Dict[str, str] = {
     "output_gain": "MOD_OUTPUTMUTE_ALG0_MUTE{index}",   # gain/mute cell (hw-confirmed)
     "virtual_gain": "MOD_VCPMUTE_ALG0_MUTE{index}",      # VCP gain/mute cell (hw-confirmed)
     "output_delay": "MOD_DELAY__PHASE_SWITCH_DELAY{letter}_DELAYAMT",
-    # Per-output POLARITY / phase-invert cell (Helix "Polarity normal/inverted"). Lives in the
-    # same DELAY__PHASE_SWITCH module as the delay cell (adjacent INV{letter} sub-cell). The
-    # numeric suffix after INV{letter}_ is NOT a clean function of the letter, so this is a
-    # PREFIX-wildcard template resolved against the param map. ENCODING PROVISIONAL (see
-    # OutputChannel.resolve_polarity): assumed a ±1.0 (8.24) sign multiplier — UNVALIDATED on hw.
+    # LEGACY per-output INV{letter} cell in the DELAY__PHASE_SWITCH module. This is NOT the real
+    # polarity: it reads 0 for both normal AND inverted. Actual polarity is the SIGN of the output
+    # gain/mute cell (see OutputChannel.polarity / is_inverted / gain — hardware-confirmed
+    # 2026-08-30). Kept only so the export field enumeration (validate.py) can name the cell; the
+    # numeric suffix after INV{letter}_ is not a clean function of the letter, hence a prefix template.
     "output_polarity": "MOD_DELAY__PHASE_SWITCH_INV{letter}_*",
     "output_mute": "MOD_OUTPUTMUTE_ALG0_MUTE{index}",
     "input_mute": "MOD_INPUTGAIN_ALG0_MUTE{index}",
@@ -491,17 +491,6 @@ class OutputChannel(_GraphicEqMixin, _Channel):
 
     def eq_band(self, i: int, f: float, Q: float, gain_db: float, kind: str = "peaking") -> "OutputChannel":
         self._write_eq(self.resolve_eq_band(i), f, Q, gain_db, kind)
-        return self
-
-    def polarity(self, inverted: bool = True, unsafe: bool = False) -> "OutputChannel":
-        """Set this output's polarity (Helix "Polarity normal/inverted"). PROVISIONAL encoding
-        (±1.0 sign multiplier) — gated behind ``unsafe`` and logs a one-time provisional warning;
-        readback-verify on real hardware."""
-        ref = self.resolve_polarity()
-        _warn_provisional_once(f"polarity:{ref.name}",
-                               f"{self.label} polarity -> {'inverted' if inverted else 'normal'} "
-                               f"(±1.0 encoding UNVALIDATED on hw)")
-        self._controls().set_polarity(ref.name, inverted, unsafe=unsafe)
         return self
 
     def crossover_section(self, kind: str, freq: Optional[float] = None,

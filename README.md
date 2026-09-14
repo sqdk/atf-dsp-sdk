@@ -101,12 +101,12 @@ overlay labels only, never an addressing key. Counts and shapes come from
 `tools/discover_channels.py` plus a per-model `.channels.yaml` overlay; nothing
 about the channel topology is hardcoded.
 
-All typed value encoders — gain, mute, delay, EQ, crossover, and routing — are
-hardware-confirmed against the MATCH M 5.4DSP and need no `unsafe=True`. Only
-**polarity** (an assumed ±1.0 sign multiplier) remains provisional and stays
-gated behind `unsafe=True` pending readback confirmation. See
-[docs/channels.md](docs/channels.md) for the full status matrix and
-[Hardware validation](#hardware-validation) below.
+All typed value encoders — gain, mute, polarity, delay, EQ (peaking + shelves),
+crossover, phase, and routing — are hardware-confirmed against the MATCH M 5.4DSP
+and need no `unsafe=True`. Polarity is the **sign of the output gain cell**
+(`output.polarity()` / `output.gain(db, inverted=True)` / `output.is_inverted()`),
+not a separate switch. See [docs/channels.md](docs/channels.md) for the full
+status matrix and [Hardware validation](#hardware-validation) below.
 
 ## Protocol & format documentation
 
@@ -139,7 +139,7 @@ model, point the tool at that model's `.at01` to build its map.
 ## Hardware validation
 
 Development, and all hardware validation to date, has been against a **MATCH
-M 5.4DSP** (session dated 2026-08-26). Because the DSP round-trip is lossy by
+M 5.4DSP** (bench sessions 2026-08-26 → 08-31). Because the DSP round-trip is lossy by
 construction, validation runs in two directions with tolerance-aware
 comparisons — the runbook is
 [docs/hardware-validation.md](docs/hardware-validation.md):
@@ -153,20 +153,26 @@ comparisons — the runbook is
 
 Confirmed on hardware (no `unsafe=True` required):
 
-| Area | Status |
-|------|--------|
-| 8.24 fixed-point · gain (dB) · mute | confirmed |
-| Delay (integer samples, fs = 48 kHz) | confirmed |
-| EQ (RBJ biquad bands) | confirmed |
-| Crossover — Butterworth / Linkwitz-Riley at 12 & 24 dB | confirmed |
-| Routing (both matrices; linear mix gains) | confirmed |
+| Area | Confirmed |
+|------|-----------|
+| 8.24 fixed-point · gain (dB) · mute | 2026-08-26 |
+| Polarity — the **sign** of the output gain cell | 2026-08-30 |
+| Delay (integer samples, fs = 48 kHz) | 2026-08-26 |
+| EQ — RBJ biquad peaking **and** low/high shelves | peaking 2026-08-26 · shelves 2026-08-30 |
+| Crossover — Butterworth / Linkwitz-Riley at 12 / 24 / 36 dB | 12·24 2026-08-26 · 36 dB + stage-map fix 2026-08-30 |
+| Phase — 2nd-order all-pass section (0–360°) | 2026-08-30 |
+| Whole-EQ bypass | 2026-08-31 |
+| Routing (both matrices; linear mix gains) | 2026-08-26 |
 
-Not yet validated (gated / provisional):
+Note: an earlier crossover stage mapping (`LP = [3, 2]`) was wrong and was
+corrected to `HP = [0,1,2]` / `LP = [3,4,5]` against the PC-Tool oracle; it had
+only ever "passed" because SDK-writes→SDK-reads is circular.
 
-- **Polarity** — the `INV{letter}` cell is confirmed, but its ±1.0
-  sign-multiplier encoding is unvalidated; gated behind `unsafe=True`.
-- **Crossover** characteristics/slopes beyond the above (e.g. **Bessel**, 6/18
-  dB per octave) are not yet mapped.
+Not yet fully validated:
+
+- **Crossover** — the 36 dB *Linkwitz-Riley* Q's were captured off the amp, but
+  the 36 dB *Butterworth* Q's use the standard 6th-order values and have not yet
+  been oracle-captured; **Bessel** and 6 / 18 dB slopes are not mapped at all.
 - **Input Signal Analyzer** — the exact readback cell set and polling cadence
   still need a live capture to confirm.
 
