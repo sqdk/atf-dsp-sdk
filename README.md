@@ -181,13 +181,13 @@ V-series to BRAX DSP), so any ACO device should enumerate and identify.
 
 Parameter maps are **generated**, not hand-written. Each is derived from the
 model's `.at01` **device file** — the SigmaStudio parameter export (name → DSP
-address) that ships inside the DSP PC-Tool install under `.../app/deviceFiles/`,
-one per model. A single PC-Tool installation therefore already contains the
-device file for *every* ACO model, whether or not you own that amp. (An `.at01`
-is not a saved tune — that's a **`.pct6`** setup/project file, handled
-separately.) `tools/build_param_maps.py` inflates an `.at01` and writes the
-`{name: address}` JSON; **only the generated JSON is committed, never the raw
-`.at01`.**
+address) that the DSP PC-Tool ships with, one per model, in a `deviceFiles/`
+folder among its application files. One copy of those files therefore covers
+*every* ACO model, whether or not you own that amp — the maps here were built by
+scanning that folder. (An `.at01` is not a saved tune — that's a **`.pct6`**
+setup/project file, kept in a separate `setups/` folder and handled separately.)
+`tools/build_param_maps.py` inflates an `.at01` and writes the `{name: address}`
+JSON; **only the generated JSON is committed, never the raw `.at01`.**
 
 The repository ships generated maps for **every model in the `MODEL_AT01`
 table** — the full MATCH / HELIX / BRAX range, including both BRAX firmware rates
@@ -229,10 +229,10 @@ also takes an explicit `fs=` override.
 The shipped maps can be rebuilt from your own PC-Tool install (e.g. after a
 PC-Tool update, or to add a model not yet in `MODEL_AT01`):
 
-1. Find the model's `.at01` in your DSP PC-Tool install
-   (`.../app/deviceFiles/`), e.g. `HelixDSP3.at01`. The basename must match the
-   one mapped for that model in [`atf_dsp/models.py`](atf_dsp/models.py)
-   (`MODEL_AT01`).
+1. Find the model's `.at01` among your DSP PC-Tool's files — they live in a
+   `deviceFiles/` folder (search the install for `*.at01`), e.g. `HelixDSP3.at01`.
+   The basename must match the one mapped for that model in
+   [`atf_dsp/models.py`](atf_dsp/models.py) (`MODEL_AT01`).
 2. Generate the parameter map:
    ```bash
    python tools/build_param_maps.py /path/to/HelixDSP3.at01 --out atf_dsp/data
