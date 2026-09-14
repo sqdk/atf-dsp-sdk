@@ -14,9 +14,9 @@ from __future__ import annotations
 import math
 from typing import Dict, Optional
 
-from acodsp.contract import rta_spec
-from acodsp.device import Device
-from acodsp.encoding import from_fixed
+from atf_dsp.contract import rta_spec
+from atf_dsp.device import Device
+from atf_dsp.encoding import from_fixed
 
 _SPEC = rta_spec()
 READBACK_CELLS: Dict[str, int] = {k: int(v) for k, v in _SPEC.get("readback_cells", {}).items()}

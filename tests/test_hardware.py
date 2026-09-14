@@ -1,9 +1,9 @@
 """Opt-in hardware tests.
 
-Enabled only when ACODSP_HW=<port> (e.g. ACODSP_HW=/dev/cu.usbmodem1234) is set;
+Enabled only when ATF_DSP_SDK_HW=<port> (e.g. ATF_DSP_SDK_HW=/dev/cu.usbmodem1234) is set;
 skipped otherwise so the offline suite stays green with no hardware.
 
-Safety: read-only by default. The write test is further gated by ACODSP_HW_WRITE=1,
+Safety: read-only by default. The write test is further gated by ATF_DSP_SDK_HW_WRITE=1,
 and it snapshots the target, writes back the *same* value, then restores — it never
 mutes and never leaves the amp on a changed setup. Setup switching uses 0x1F only.
 """
@@ -13,12 +13,12 @@ import os
 
 import pytest
 
-from acodsp.device import Device
+from atf_dsp.device import Device
 
-PORT = os.environ.get("ACODSP_HW")
-ALLOW_WRITE = os.environ.get("ACODSP_HW_WRITE") == "1"
+PORT = os.environ.get("ATF_DSP_SDK_HW")
+ALLOW_WRITE = os.environ.get("ATF_DSP_SDK_HW_WRITE") == "1"
 
-pytestmark = pytest.mark.skipif(not PORT, reason="set ACODSP_HW=<port> to run hardware tests")
+pytestmark = pytest.mark.skipif(not PORT, reason="set ATF_DSP_SDK_HW=<port> to run hardware tests")
 
 
 @pytest.fixture()
@@ -62,7 +62,7 @@ def test_read_param(dev):
     assert len(data) == 4
 
 
-@pytest.mark.skipif(not ALLOW_WRITE, reason="set ACODSP_HW_WRITE=1 to allow the write round-trip")
+@pytest.mark.skipif(not ALLOW_WRITE, reason="set ATF_DSP_SDK_HW_WRITE=1 to allow the write round-trip")
 def test_write_roundtrip_restores(dev):
     addr = 4600  # benign readback cell; we write back the same value we read
     snap = dev.snapshot([addr])

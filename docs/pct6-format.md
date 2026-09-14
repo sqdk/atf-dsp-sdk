@@ -38,7 +38,7 @@ Qt `QDomDocument` XML, parsed by `FUN_00615090` (references `"afpxFileType:"`). 
 
 - **`<ATF>` attributes** (metadata): `Dev` = the PC-Tool **INTERNAL device-type id** (its own
   model enum, e.g. `29` for the M 5.4DSP, `50` for the UP 8BMW) — **NOT the USB PID** (`0x2008`
-  for the M 5.4DSP): the two are different number spaces (see `acodsp.models.DEV_IDS` for the
+  for the M 5.4DSP): the two are different number spaces (see `atf_dsp.models.DEV_IDS` for the
   internal ids vs `PID_MODELS` for the USB PIDs). `V` = tool version (e.g. `6.03.03`),
   `OUTS` = output-channel count, `INS` = input-channel count, `FN` = original path, plus
   `VCO/VM/IOR/AV/IGL/IGM/FV/TM/ICT/...` flags.
@@ -62,7 +62,7 @@ Qt `QDomDocument` XML, parsed by `FUN_00615090` (references `"afpxFileType:"`). 
 ## Status
 Phase A (scheme) + Phase B (decrypt + container) — **CONFIRMED** (self-proving decrypt).
 Phase C (XML → `Setup` model) + a safe slice of Phase D (encrypt/save round-trip) — **DONE**
-in `atf_dsp_control/acodsp/pct6.py` (`Setup.load/save`, `Device.apply_setup` dry-run;
+in `atf_dsp_control/atf_dsp/pct6.py` (`Setup.load/save`, `Device.apply_setup` dry-run;
 `<Fil T>` codes 1/17=peaking, 9=lowpass, 10=highpass — the latter two inferred from the
 HPi/LPi index correspondence). See `atf_dsp_control/docs/pct6.md` for the model + usage.
 Phase D **CONFIRMED end-to-end (2026-08-27)**: a library-edited `.pct6` (changed a note + one
@@ -120,7 +120,7 @@ Each channel's `CN` is a role code (same value threads the input→virtual→out
 = Front Left). The name isn't a stored string — `CN` keys a `std::map<int, ChannelSetup>` in the exe
 (builder `FUN_005f0410`, lookup `0x5ef5d0`) whose descriptor is composed as
 `"[type] [position] [side] [band] [number]"` (composer `0x5f3e30`) from `tr()` keys. The full
-**53-entry `CN`→name table** is recovered into `acodsp/pct6.py` (`CN_NAMES`), VALIDATED against the
+**53-entry `CN`→name table** is recovered into `atf_dsp/pct6.py` (`CN_NAMES`), VALIDATED against the
 UP-8BMW inputs (CN 1/2=Front L/R, 14/15=Rear L/R, 26/27=Subwoofer 1/2, 38/39=Digital In L/R,
 54/55=AUX In L/R). `Channel.name` auto-resolves from `CN`. **CN 13 & 25 resolve to `"Unknown
 (CN13/25)"`** — they appear in setups authored/migrated from v6.03.03 but are **absent from the

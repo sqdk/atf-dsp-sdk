@@ -1,4 +1,4 @@
-"""Offline tests for the CHANNEL-MODEL abstraction layer (acodsp.channels).
+"""Offline tests for the CHANNEL-MODEL abstraction layer (atf_dsp.channels).
 
 Covers: data-driven topology (counts/shapes from discovery, never hardcoded),
 name resolution to real .at01 params, the overlay-driven band->(block,stage) map
@@ -11,11 +11,11 @@ import copy
 
 import pytest
 
-from acodsp import encoding, protocol
-from acodsp.channels import ChannelModel, ChannelModelError
-from acodsp.device import Device
-from acodsp.params import ParamMap
-from acodsp.transport import Link, parse_frames
+from atf_dsp import encoding, protocol
+from atf_dsp.channels import ChannelModel, ChannelModelError
+from atf_dsp.device import Device
+from atf_dsp.params import ParamMap
+from atf_dsp.transport import Link, parse_frames
 
 
 @pytest.fixture()
@@ -194,7 +194,7 @@ def test_set_band_gain_equals_eq_band_at_iso_freq_and_default_q(pm: ParamMap):
 
 def test_set_band_gain_is_chainable_and_scoped(pm: ParamMap):
     dev = _dry_device(pm)
-    from acodsp.channels import OutputChannel
+    from atf_dsp.channels import OutputChannel
     assert isinstance(dev.model.output("A").set_band_gain(0, 2.0), OutputChannel)
     # virtual graphic channels have it; a pass-through (G) still refuses (no EQ).
     dev.model.virtual("A").set_band_gain(0, 1.0)
@@ -443,7 +443,7 @@ def test_phase_write_emits_allpass_at_stage8(pm: ParamMap):
 def _read_section(oc, kind, writes, pm):
     """Decode a crossover section back from the written SafeLoad frames (the dsp_web pattern:
     read each stage's coeffs, keep the active ones as (corner, Q))."""
-    from acodsp.channels import _XOVER_STAGES
+    from atf_dsp.channels import _XOVER_STAGES
     recs = []
     for pos in range(len(_XOVER_STAGES[kind])):
         payload = writes.get(pm.addr(oc.resolve_crossover(kind, pos).base))
@@ -457,7 +457,7 @@ def _read_section(oc, kind, writes, pm):
 
 
 def test_per_section_custom_and_lr_crossover_roundtrip(pm: ParamMap):
-    from acodsp.channels import crossover_characteristic
+    from atf_dsp.channels import crossover_characteristic
     # Output F: HP self-defined (custom) Q1.5, single stage; LP OFF.
     dev = _dry_device(pm)
     of = dev.model.output("F")
@@ -505,7 +505,7 @@ def test_bypass_eq_band_writes_passthrough(pm: ParamMap):
 
 
 def test_whole_eq_bypass_writes_mux_index(pm: ParamMap):
-    from acodsp.channels import EQ_BYPASS_INDEX, EQ_ACTIVE_INDEX
+    from atf_dsp.channels import EQ_BYPASS_INDEX, EQ_ACTIVE_INDEX
     dev = _dry_device(pm)
     o = dev.model.output("A")
     ref = o.resolve_eq_bypass()
@@ -521,7 +521,7 @@ def test_whole_eq_bypass_writes_mux_index(pm: ParamMap):
 
 
 def test_virtual_eq_bypass_maps_to_its_eq_region(pm: ParamMap):
-    from acodsp.channels import EQ_BYPASS_INDEX, _VIRTUAL_EQ_BYPASS_PREFIX
+    from atf_dsp.channels import EQ_BYPASS_INDEX, _VIRTUAL_EQ_BYPASS_PREFIX
     dev = _dry_device(pm)
     checked = 0
     for vc in dev.model.virtuals():

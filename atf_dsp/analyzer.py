@@ -38,9 +38,9 @@ import time
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence
 
-from acodsp import encoding
-from acodsp.device import Device
-from acodsp.encoding import from_fixed, to_fixed
+from atf_dsp import encoding
+from atf_dsp.device import Device
+from atf_dsp.encoding import from_fixed, to_fixed
 
 # ------------------------------------------------------------------ param names
 # M 5.4DSP `.at01` names (resolved to addresses by the Device's ParamMap). See the findings doc.

@@ -2,7 +2,7 @@
 
 The map is derived from the vendor `.at01` SigmaStudio export, whose body is a list
 of `#define <NAME>_ADDR <n>` lines. Only the generated JSON maps are tracked in the
-repo (see acodsp/data/); the raw vendor files are not.
+repo (see atf_dsp/data/); the raw vendor files are not.
 """
 from __future__ import annotations
 
@@ -54,7 +54,7 @@ class ParamMap:
 
     @classmethod
     def load(cls, name: str) -> "ParamMap":
-        """Load a generated map from acodsp/data/ by basename (e.g. 'MatchM54DSP')."""
+        """Load a generated map from atf_dsp/data/ by basename (e.g. 'MatchM54DSP')."""
         path = DATA_DIR / f"{name}.json"
         if not path.exists():
             raise FileNotFoundError(f"No generated param map at {path}")

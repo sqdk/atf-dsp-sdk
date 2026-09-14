@@ -3,7 +3,7 @@
 Part 2 is an *implementation* of protocol.yaml (see ``docs/encoding.md``): the fixed-point
 format and RTA cells are read from the contract rather than hard-coded, so a
 contract revision flows through without touching code. The file is bundled at
-acodsp/data/protocol.yaml (pinned by its `version:`).
+atf_dsp/data/protocol.yaml (pinned by its `version:`).
 """
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Offline tests for the .pct6/.afpx setup reader/writer (acodsp.pct6).
+"""Offline tests for the .pct6/.afpx setup reader/writer (atf_dsp.pct6).
 
 Covers: the crypto/container codec round-trip, parsing the shipped sample into a
 structured Setup (metadata, per-channel EQ/gain/mute, band ordering, filter-type
@@ -11,9 +11,9 @@ from pathlib import Path
 
 import pytest
 
-from acodsp.device import Device
-from acodsp.params import ParamMap
-from acodsp.pct6 import (
+from atf_dsp.device import Device
+from atf_dsp.params import ParamMap
+from atf_dsp.pct6 import (
     CN_NAMES,
     CN_NAMES_UNKNOWN,
     FIL_TYPE_MAP,
@@ -24,7 +24,7 @@ from acodsp.pct6 import (
     q_compress,
     q_uncompress,
 )
-from acodsp.transport import Link, parse_frames
+from atf_dsp.transport import Link, parse_frames
 
 SAMPLE = (Path(__file__).resolve().parents[2]
           / "extracted/app/setups/UP_8BMW_PP-BMW1_7Hifi_Basic.pct6")

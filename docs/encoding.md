@@ -1,9 +1,9 @@
 # Value encoding — per control type
 
 Source of truth: `../protocol.yaml` (`encoders:`, `dsp_rw.safeload`, `rta:`). Every
-format below is implemented as a pure function in `acodsp/encoding.py` (no I/O) and
-exposed as a typed method in `acodsp/controls.py`. The fixed-point parameters are read
-at import from the bundled `acodsp/data/protocol.yaml` (`encoders._fixed_point`) rather
+format below is implemented as a pure function in `atf_dsp/encoding.py` (no I/O) and
+exposed as a typed method in `atf_dsp/controls.py`. The fixed-point parameters are read
+at import from the bundled `atf_dsp/data/protocol.yaml` (`encoders._fixed_point`) rather
 than hard-coded, so a contract revision flows through without a code change.
 
 All DSP words are **32-bit, big-endian** on the wire (`dsp_rw.byte_order: big`); the
@@ -74,4 +74,4 @@ firmware does not byte-swap.
   `linear_to_dbfs` (`20*log10|value|`, floored). Cells: `input_rta 4957`, `input_peak 4944`,
   `output_peak 8451`, `vcp_peak 6813`, `volume_rb 4600`, `sigdet 4958`.
 - The read path is the confirmed 0x02 primitive (side-effect-free); the exact polling
-  set/cadence still needs a PC-Tool capture. API: `acodsp/rta.py` `RTA`.
+  set/cadence still needs a PC-Tool capture. API: `atf_dsp/rta.py` `RTA`.

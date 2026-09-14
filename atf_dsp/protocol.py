@@ -16,7 +16,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from acodsp.transport import Link
+    from atf_dsp.transport import Link
 
 # -- opcodes ---------------------------------------------------------------
 OP_DSP_READ = 0x02

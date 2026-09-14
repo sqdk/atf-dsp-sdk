@@ -15,7 +15,7 @@ from __future__ import annotations
 import math
 from typing import Dict, List, Tuple
 
-from acodsp.contract import fixed_point
+from atf_dsp.contract import fixed_point
 
 # --- fixed-point format (from protocol.yaml.encoders._fixed_point) ----------
 _FP = fixed_point()
@@ -197,7 +197,7 @@ def peaking_from_coeffs(stored: List[int], fs: int = DEFAULT_FS):
 def lphp_corner_from_coeffs(stored: List[int], fs: int = DEFAULT_FS):
     """Invert a stored RBJ low/high-pass biquad ([B2,B1,B0,A2,A1] 8.24 words) -> (f0, Q).
 
-    Used by the crossover-corner recovery (:meth:`acodsp.channels.OutputChannel.recover_crossover`
+    Used by the crossover-corner recovery (:meth:`atf_dsp.channels.OutputChannel.recover_crossover`
     and :meth:`Setup.from_device`) to read a corner frequency + Q back off the DSP's FILTERS
     stages. The RBJ lowpass and highpass share IDENTICAL a-side (pole) coefficients, so f0/Q
     recover the same way for both — WHICH one it is (HP vs LP) is known from the FILTERS stage

@@ -10,11 +10,11 @@ import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
-from acodsp import protocol
-from acodsp.models import at01_for_model, model_for_pid
-from acodsp.params import ParamMap
-from acodsp.protocol import Protocol
-from acodsp.transport import Link
+from atf_dsp import protocol
+from atf_dsp.models import at01_for_model, model_for_pid
+from atf_dsp.params import ParamMap
+from atf_dsp.protocol import Protocol
+from atf_dsp.transport import Link
 
 AddrOrName = Union[int, str]
 
@@ -120,7 +120,7 @@ class Device:
         if self._channel_model is None:
             if self.params is None:
                 raise RuntimeError("no param map loaded; cannot build the channel model")
-            from acodsp.channels import ChannelModel
+            from atf_dsp.channels import ChannelModel
 
             basename = at01_for_model(self.model_name) or self.model_name
             self._channel_model = ChannelModel.load(basename, self.params, device=self)
@@ -261,11 +261,11 @@ class Device:
 
     # -- setup files (.pct6 / .afpx) --------------------------------------
     def apply_setup(self, setup, dry_run: bool = True, force: bool = False):
-        """Apply a parsed :class:`acodsp.pct6.Setup` to this device's channel model.
+        """Apply a parsed :class:`atf_dsp.pct6.Setup` to this device's channel model.
 
         Dry-run by default (never transmits to real hardware). See
-        :func:`acodsp.pct6.apply_setup` for the full safety + device-PID-match contract.
+        :func:`atf_dsp.pct6.apply_setup` for the full safety + device-PID-match contract.
         """
-        from acodsp.pct6 import apply_setup as _apply_setup
+        from atf_dsp.pct6 import apply_setup as _apply_setup
 
         return _apply_setup(self, setup, dry_run=dry_run, force=force)

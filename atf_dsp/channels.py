@@ -15,7 +15,7 @@ resolved references and log a one-time warning when written through — reads ar
 always safe and never gated here.
 
 DSP math (biquads, gain/delay encoding) and the glitch-free firmware-SafeLoad write
-path are reused wholesale from :mod:`acodsp.encoding` and :mod:`acodsp.controls`
+path are reused wholesale from :mod:`atf_dsp.encoding` and :mod:`atf_dsp.controls`
 (which write via ``Device.write_param(safeload=True)``); this module only does
 topology + name resolution.
 """
@@ -29,10 +29,10 @@ from typing import Dict, List, Optional
 
 import yaml
 
-from acodsp import encoding
-from acodsp.controls import Controls, NotConfirmedError
-from acodsp.encoding import EQ_STORAGE_ORDER
-from acodsp.params import ParamMap
+from atf_dsp import encoding
+from atf_dsp.controls import Controls, NotConfirmedError
+from atf_dsp.encoding import EQ_STORAGE_ORDER
+from atf_dsp.params import ParamMap
 
 # discover() is the single source of structural truth — never re-implement it here.
 import sys as _sys
@@ -203,7 +203,7 @@ class EqBandRef:
 # overlay loading
 # ---------------------------------------------------------------------------
 def _load_overlay(model_name: str) -> Optional[dict]:
-    """Load ``<model_name>.channels.yaml`` from acodsp/data (None if absent)."""
+    """Load ``<model_name>.channels.yaml`` from atf_dsp/data (None if absent)."""
     path = DATA_DIR / f"{model_name}.channels.yaml"
     if not path.exists():
         return None
@@ -577,7 +577,7 @@ class OutputChannel(_GraphicEqMixin, _Channel):
 
         Returns ``{'highpass': CrossoverRecovery, 'lowpass': CrossoverRecovery}``.
         """
-        from acodsp import encoding
+        from atf_dsp import encoding
 
         dev = self._model.device
         if dev is None:
@@ -770,7 +770,7 @@ class RoutingMatrix:
 
     def read(self, device=None) -> "RoutingMatrix":
         """Load the live matrix by reading every cell (0x02) via *device*."""
-        from acodsp import encoding
+        from atf_dsp import encoding
 
         dev = device if device is not None else self.model.device
         if dev is None:

@@ -1,20 +1,20 @@
-# acodsp
+# atf-dsp-sdk
 
 Python SDK for programmatic control of **Audiotec Fischer** ACO-platform DSP
 amplifiers (MATCH / HELIX / BRAX) over USB, built on a reverse-engineered
 serial protocol.
 
-The vendor ships a Windows-only tuning GUI (DSP PC-Tool). `acodsp` exposes the
-same amp as a scriptable Python object — read/write DSP parameters, switch
+The vendor ships a Windows-only tuning GUI (DSP PC-Tool). `atf-dsp-sdk` exposes
+the same amp as a scriptable Python object — read/write DSP parameters, switch
 setups, drive EQ / delay / gain per channel, and read the on-chip Input Signal
 Analyzer — from macOS, Linux, or Windows.
 
-The scope is deliberately narrow: this is a **serial-protocol library** for the
-DSP amplifier itself. Higher-level tuning workflows (auto-EQ, target curves,
-time-alignment procedures, room-correction) are intentionally out of scope.
-
-> Not affiliated with or endorsed by Audiotec Fischer. Use at your own risk;
-> writing wrong values to a DSP can damage speakers. See the safety notes below.
+> **Independent, unofficial, and built exclusively for programmatic
+> interoperability.** This project is **not affiliated with, endorsed by,
+> sponsored by, or supported by Audiotec Fischer GmbH** in any way. It exists
+> solely to let software interoperate with a device the author lawfully owns.
+> Use at your own risk; writing wrong values to a DSP can damage speakers. See
+> the safety notes below.
 
 ## Install
 
@@ -30,19 +30,19 @@ The core package needs only `pyserial` and `PyYAML`. Optional extras:
 ## Quickstart — CLI
 
 ```bash
-acodsp list                       # enumerate serial ports; flag ATF devices
-acodsp identify                   # model / firmware / current setup
-acodsp get-setup
-acodsp set-setup 3                # clean switch (no mute); add --dry-run to preview
-acodsp read MOD_VOLUME_READBACK_VOLRB_READBACK_READBACKALGNEWSIGMA3005VALUE
-acodsp write 0x11F8 00400000 --dry-run
-acodsp write <PARAM_NAME> 00400000 --dry-run --model "MATCH M 5.4DSP"
+atf-dsp-sdk list                       # enumerate serial ports; flag ATF devices
+atf-dsp-sdk identify                   # model / firmware / current setup
+atf-dsp-sdk get-setup
+atf-dsp-sdk set-setup 3                # clean switch (no mute); add --dry-run to preview
+atf-dsp-sdk read MOD_VOLUME_READBACK_VOLRB_READBACK_READBACKALGNEWSIGMA3005VALUE
+atf-dsp-sdk write 0x11F8 00400000 --dry-run
+atf-dsp-sdk write <PARAM_NAME> 00400000 --dry-run --model "MATCH M 5.4DSP"
 ```
 
 ## Quickstart — library
 
 ```python
-from acodsp import Device
+from atf_dsp import Device
 
 with Device.connect() as dev:                      # auto-detects by USB VID 0x2E4F
     print(dev.identify())
@@ -57,7 +57,7 @@ A higher-level, data-driven abstraction over the raw params — inputs, virtual
 [docs/channels.md](docs/channels.md).
 
 ```python
-from acodsp import Device
+from atf_dsp import Device
 
 with Device.connect() as dev:
     dev.model.output("A").gain(-3).delay_ms(2.5)
@@ -102,8 +102,8 @@ committed.
 ## Tests
 
 ```bash
-python -m pytest tests -q                                       # offline
-ACODSP_HW=/dev/cu.usbmodemXXXX python -m pytest tests -q        # opt-in HW (read-only)
+python -m pytest tests -q                                          # offline
+ATF_DSP_SDK_HW=/dev/cu.usbmodemXXXX python -m pytest tests -q      # opt-in HW (read-only)
 ```
 
 ## Safety
@@ -120,8 +120,9 @@ MIT — see [LICENSE](LICENSE).
 
 ## Disclaimer
 
-Not affiliated with, endorsed by, or supported by Audiotec Fischer GmbH.
-"MATCH", "HELIX", "BRAX", and "DSP PC-Tool" are trademarks of their respective
-owners. This project documents behavior of a device the author lawfully owns,
-for interoperability purposes. No vendor firmware, installer, or project files
-are redistributed.
+**This is an independent, unofficial project. It is not affiliated with,
+endorsed by, sponsored by, or supported by Audiotec Fischer GmbH.** It is built
+exclusively for programmatic interoperability with a device the author lawfully
+owns. "MATCH", "HELIX", "BRAX", and "DSP PC-Tool" are trademarks of their
+respective owners and are used here only for identification. No vendor firmware,
+installer, or project files are redistributed.

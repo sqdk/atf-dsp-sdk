@@ -1,4 +1,4 @@
-"""Offline tests for the PROVISIONAL Input Signal Analyzer (ISA) reader (acodsp.analyzer).
+"""Offline tests for the PROVISIONAL Input Signal Analyzer (ISA) reader (atf_dsp.analyzer).
 
 No hardware: a FakeDevice returns canned readback bytes and records writes. These lock the
 decode math, the swept-read orchestration, the safety gate, and the .at01 address bindings.
@@ -10,8 +10,8 @@ import math
 
 import pytest
 
-from acodsp import analyzer
-from acodsp.analyzer import (
+from atf_dsp import analyzer
+from atf_dsp.analyzer import (
     InputAnalyzer,
     Spectrum,
     bandpass_coeffs,
@@ -20,8 +20,8 @@ from acodsp.analyzer import (
     read_input,
     settle_ms,
 )
-from acodsp.encoding import from_fixed, to_bytes_be, to_fixed
-from acodsp.params import ParamMap
+from atf_dsp.encoding import from_fixed, to_bytes_be, to_fixed
+from atf_dsp.params import ParamMap
 
 UNITY = 0x01000000
 HALF = 0x00800000  # 0.5 in 8.24 → -6.02 dBFS

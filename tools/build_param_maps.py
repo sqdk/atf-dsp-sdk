@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""build_param_maps.py — generate acodsp/data/<model>.json from vendor .at01 files.
+"""build_param_maps.py — generate atf_dsp/data/<model>.json from vendor .at01 files.
 
 Reads the SigmaStudio param exports from the research workspace and emits one JSON
 map per model. Two input shapes are supported:
@@ -28,11 +28,11 @@ from typing import Dict, Optional
 # Allow running from a source checkout without installing.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from acodsp.models import MODEL_AT01  # noqa: E402
-from acodsp.params import parse_at01_text  # noqa: E402
+from atf_dsp.models import MODEL_AT01  # noqa: E402
+from atf_dsp.params import parse_at01_text  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_OUT = REPO_ROOT / "acodsp" / "data"
+DEFAULT_OUT = REPO_ROOT / "atf_dsp" / "data"
 
 # Research workspace (source of truth; not redistributed).
 WORKSPACE = Path("/Users/cp/Documents/code/atf_disassemble")
@@ -94,7 +94,7 @@ def main(argv: Optional[list] = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("inputs", nargs="*", help="input .at01 / inflated .h files")
     ap.add_argument("--scan", metavar="DIR", help="build every *.at01 in DIR")
-    ap.add_argument("--out", default=str(DEFAULT_OUT), help="output dir (default acodsp/data)")
+    ap.add_argument("--out", default=str(DEFAULT_OUT), help="output dir (default atf_dsp/data)")
     args = ap.parse_args(argv)
 
     out_dir = Path(args.out)

@@ -3,7 +3,7 @@
 VID is Audiotec Fischer (0x2E4F); the PID identifies the model. The firmware is
 shared across all 35 ACO models, so only the PID and the per-model .at01 param map
 differ. `at01_for_model` names the SigmaStudio export basename (which is also the
-generated JSON basename in acodsp/data/).
+generated JSON basename in atf_dsp/data/).
 """
 from __future__ import annotations
 
@@ -78,7 +78,7 @@ PID_MODELS = {
 }
 
 # model name -> device-file (.at01) basename. This basename is also the generated
-# JSON basename under acodsp/data/. BRAX ships two rates; default to 192 kHz.
+# JSON basename under atf_dsp/data/. BRAX ships two rates; default to 192 kHz.
 MODEL_AT01 = {
     "BRAX DSP": "BraxDSP192kHz",
     "HELIX DSP MINI": "HelixDSPMini",

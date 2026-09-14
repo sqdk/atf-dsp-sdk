@@ -1,11 +1,11 @@
-"""validate.py — an end-to-end validation harness for the acodsp control surface.
+"""validate.py — an end-to-end validation harness for the atf_dsp control surface.
 
 The goal is to PROVE, against real hardware with the DSP PC-Tool as the independent oracle,
 that we SET and READ every control correctly. Two directions, deliberately separated because
 they close different gaps:
 
 * **Direction B — SDK writes -> SDK reads (:func:`exercise_all`).** Apply a comprehensive,
-  deterministic :class:`TestVector` through the acodsp control setters, then read every cell
+  deterministic :class:`TestVector` through the atf_dsp control setters, then read every cell
   back off the DSP, decode it, and assert it matches within tolerance. This proves *writes
   persist*, *encode/decode are inverse*, and *SafeLoad works* — but it is PARTIALLY CIRCULAR:
   it uses our own encoders on both ends, so it does NOT prove a cell is the semantically-correct
@@ -30,7 +30,7 @@ import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-from acodsp import encoding
+from atf_dsp import encoding
 
 # ---------------------------------------------------------------------------
 # tolerances
@@ -373,7 +373,7 @@ def _all_targets(device, vector: TestVector) -> List[Tuple[str, int]]:
         for spec in ov.eq:
             targets.append((oc.resolve_eq_band(spec.band).base, 20))
         if ov.crossover is not None:
-            from acodsp.channels import _XOVER_STAGES
+            from atf_dsp.channels import _XOVER_STAGES
             for kind in ("highpass", "lowpass"):
                 # snapshot EVERY stage the write touches (active + the bypassed rest), so
                 # snapshot/restore fully covers a section (up to 3 stages for 36 dB).
@@ -415,7 +415,7 @@ def _restore(device, snap: Dict[str, bytes]) -> None:
 
 def exercise_all(device, vector: Optional[TestVector] = None, *, allow_unsafe: bool = True,
                  snapshot: bool = True, tol: Tolerance = DEFAULT_TOL) -> Report:
-    """DIRECTION B — apply the whole *vector* via the acodsp control setters, then read every
+    """DIRECTION B — apply the whole *vector* via the atf_dsp control setters, then read every
     cell back, decode it, and assert it is within *tolerance*.
 
     Proves (on the memory-backed dry-run device AND on real hardware): writes PERSIST,
@@ -553,7 +553,7 @@ def _readback_and_check(device, vector: TestVector, rep: Report, tol: Tolerance)
 
 def _check_crossover(recovered: dict, spec: CrossoverSpec, label: str, rep: Report,
                      tol: Tolerance) -> None:
-    from acodsp.channels import _infer_crossover_characteristic  # noqa: F401 (kept for parity)
+    from atf_dsp.channels import _infer_crossover_characteristic  # noqa: F401 (kept for parity)
 
     for kind, corner in (("highpass", spec.hp), ("lowpass", spec.lp)):
         rec = recovered.get(kind)
@@ -593,7 +593,7 @@ def assert_matches_pct6(setup_or_path, vector: TestVector, *,
     """DIRECTION A — compare a ``.pct6`` (the independent PC-Tool oracle) against the known
     *vector*, tolerance-aware, and report mismatches.
 
-    ``setup_or_path`` is a :class:`acodsp.pct6.Setup` or a path to a ``.pct6``/``.afpx`` file.
+    ``setup_or_path`` is a :class:`atf_dsp.pct6.Setup` or a path to a ``.pct6``/``.afpx`` file.
     Validates our ``.pct6``/``from_device`` DECODE against the PC-Tool's ENCODE for the
     DSP-BACKED fields only: per-channel gain/mute, delay, peaking EQ (f/Q/gain recovered from the
     stored biquads), the recovered crossover corner+slope+characteristic, and both routing
@@ -601,7 +601,7 @@ def assert_matches_pct6(setup_or_path, vector: TestVector, *,
     routing AOM/OFFS) are SKIPPED and annotated — never asserted (the PC-Tool owns those; they
     are not DSP RAM params). Returns a structured :class:`Report`.
     """
-    from acodsp.pct6 import Setup
+    from atf_dsp.pct6 import Setup
 
     setup = setup_or_path if isinstance(setup_or_path, Setup) else Setup.load(setup_or_path)
     rep = Report(direction="Direction A (PC-Tool .pct6 -> SDK read)")
@@ -695,7 +695,7 @@ def _check_pct6_eq(ch, specs, label: str, rep: Report, tol: Tolerance) -> None:
 
 
 def _check_pct6_crossover(ch, spec: CrossoverSpec, label: str, rep: Report, tol: Tolerance) -> None:
-    from acodsp.channels import _infer_crossover_characteristic
+    from atf_dsp.channels import _infer_crossover_characteristic
 
     xo = ch.crossover_bands()
     for kind, corner in (("highpass", spec.hp), ("lowpass", spec.lp)):

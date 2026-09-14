@@ -23,7 +23,7 @@ This module carries three layers, kept deliberately separate:
    the device-PID match caveat.
 
 Nothing here reinvents DSP math: gain/EQ writes go through the confirmed encoders in
-:mod:`acodsp.encoding` / :mod:`acodsp.controls` / :mod:`acodsp.channels`.
+:mod:`atf_dsp.encoding` / :mod:`atf_dsp.controls` / :mod:`atf_dsp.channels`.
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 import xml.etree.ElementTree as ET
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
-    from acodsp.device import Device
+    from atf_dsp.device import Device
 
 # --- crypto/container variant keys (compile-time constants in the exe) ---------
 KEY_PCT6 = b"ATFV6"        # standard .pct6                (literal @ 0x028898a0)
@@ -390,7 +390,7 @@ class SetupMetadata:
 
     ``pid`` holds the ``Dev`` attribute — the PC-Tool's INTERNAL device-type id (e.g. 29
     for the MATCH M 5.4DSP, 50 for the UP 8BMW). This is NOT the USB PID (0x2008 for the
-    M 5.4DSP): the two are different number spaces (see :data:`acodsp.models.DEV_IDS` vs
+    M 5.4DSP): the two are different number spaces (see :data:`atf_dsp.models.DEV_IDS` vs
     ``PID_MODELS``). The device-match check in :func:`apply_setup` compares this ``Dev``
     against the connected device's OWN internal ``Dev`` id (``dev_id_for_model``), never
     against the USB PID. (The attribute is named ``pid`` for historical reasons only.)"""
@@ -494,7 +494,7 @@ class Setup:
         routing. Output CROSSOVERS are now recovered BEST-EFFORT: the FILTERS HP/LP stage
         coefficients are inverted to a corner frequency + slope (from the active-stage count)
         + a characteristic inferred from the corner-stage Q (see
-        :meth:`acodsp.channels.OutputChannel.recover_crossover` — corner/slope are exact, the
+        :meth:`atf_dsp.channels.OutputChannel.recover_crossover` — corner/slope are exact, the
         characteristic is an inference against the confirmed ``_XOVER_Q`` table). The recovered
         HP/LP appear as ``<Fil T=10/9>`` bands with HPi/LPi pointing at them; an off section is
         emitted out-of-range. NOT recovered (a PC-Tool setup concept, not a DSP RAM param): the
@@ -557,7 +557,7 @@ class Setup:
 # ---------------------------------------------------------------------------
 def _read_gain_lin(device: "Device", name: str) -> float:
     """Read a gain/mute cell -> linear multiplier (0.0 == muted). Best-effort (0 on empty)."""
-    from acodsp import encoding
+    from atf_dsp import encoding
 
     data = device.read_param(name, nbytes=4)
     if not data or len(data) < 4:
@@ -569,7 +569,7 @@ def _read_polarity_inverted(device: "Device", oc) -> bool:
     """Read a physical output's polarity -> True when inverted. Polarity is the SIGN of the
     output gain/mute cell (hardware-confirmed 2026-08-30): a negative value == inverted. Feeds
     the .pct6 ``CINV`` field. Best-effort (normal on empty/unresolvable)."""
-    from acodsp import encoding
+    from atf_dsp import encoding
 
     try:
         name = oc.resolve_gain().name          # polarity = the SIGN of the gain/mute cell
@@ -584,7 +584,7 @@ def _read_polarity_inverted(device: "Device", oc) -> bool:
 def _read_eq_bands_xml(device: "Device", resolve, count: int,
                        freqs: List[float]) -> List["ET.Element"]:
     """Read *count* EQ bands via ``resolve(i) -> EqBandRef`` and emit low->high <Fil> els."""
-    from acodsp import encoding
+    from atf_dsp import encoding
 
     els: List[ET.Element] = []
     for i in range(count):
@@ -709,14 +709,14 @@ def _total_input_count(model) -> int:
 
 
 def _from_device(device: "Device") -> "Setup":
-    from acodsp import encoding
-    from acodsp.models import dev_id_for_model
+    from atf_dsp import encoding
+    from atf_dsp.models import dev_id_for_model
 
     model = device.model
     graphic = model._graphic_freqs()
     # <ATF Dev> is the PC-Tool INTERNAL device-type id (e.g. 29 for the M 5.4DSP), NOT the
     # USB PID. Only known-verified ids are emitted; unknown models fall back to 0 (never the
-    # USB PID, which lives in a different number space — see acodsp.models.DEV_IDS).
+    # USB PID, which lives in a different number space — see atf_dsp.models.DEV_IDS).
     dev_id = dev_id_for_model(device.model_name)
 
     virtual_els: List[ET.Element] = []
@@ -872,8 +872,8 @@ def plan_setup_writes(device: "Device", setup: Setup):
     deliberately skipped here. Returns ``(writes, skipped)`` where *writes* is a list of
     ``(name, bytes)`` and *skipped* counts channel-level items that could not be resolved.
     """
-    from acodsp import encoding
-    from acodsp.channels import ChannelModelError
+    from atf_dsp import encoding
+    from atf_dsp.channels import ChannelModelError
 
     model = device.model
     writes: List[Tuple[str, bytes]] = []
@@ -957,16 +957,16 @@ def apply_setup(
         is returned.
       * ``dry_run=False`` is the LIVE apply (RE-2): it snapshots every affected param,
         writes them all, reads each back and verifies, and on ANY mismatch/error
-        AUTO-RESTORES the snapshot and raises :class:`acodsp.device.ApplyError`. Fully
+        AUTO-RESTORES the snapshot and raises :class:`atf_dsp.device.ApplyError`. Fully
         exercised offline against the memory-backed dry-run link.
       * Device-match: the setup's INTERNAL device-type id ``setup.metadata.pid`` (``<ATF
         Dev>``) is checked against the connected device's OWN internal ``Dev`` id
         (``dev_id_for_model(device.model_name)``) — same number space, NOT the USB PID.
         A mismatch raises :class:`PidMismatchError` unless ``force``. When the device's
-        internal id is unknown (not in :data:`acodsp.models.DEV_IDS`) the check degrades
+        internal id is unknown (not in :data:`atf_dsp.models.DEV_IDS`) the check degrades
         gracefully — it is skipped so a legitimate apply is never hard-failed.
     """
-    from acodsp.models import dev_id_for_model
+    from atf_dsp.models import dev_id_for_model
 
     # Compare like-for-like: both are PC-Tool INTERNAL Dev ids (e.g. 29 for the M 5.4DSP),
     # never the USB PID. dev_id_for_model returns None for models we haven't verified.

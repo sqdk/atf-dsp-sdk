@@ -1,4 +1,4 @@
-"""acodsp — programmatic control of Audiotec Fischer ACO-platform DSP amplifiers.
+"""atf_dsp — programmatic control of Audiotec Fischer ACO-platform DSP amplifiers.
 
 Part 1: transport (framing), low-level protocol primitives, param maps, device
 facade and CLI. Part 2: value encoders (encoding), typed controls, RTA.
@@ -13,18 +13,18 @@ from __future__ import annotations
 
 __version__ = "0.1.0"
 
-from acodsp.transport import Frame, Link
-from acodsp.protocol import Protocol
-from acodsp.params import ParamMap
-from acodsp.models import model_for_pid, at01_for_model, model_info, topology_for_model
-from acodsp.device import Device, ApplyError
-from acodsp import encoding
-from acodsp.controls import Controls, NotConfirmedError
-from acodsp.channels import ChannelModel, InputChannel, OutputChannel, VirtualChannel, RoutingMatrix, Routing
-from acodsp.channels import crossover_characteristic
-from acodsp.rta import RTA
-from acodsp.analyzer import InputAnalyzer, Spectrum, read_input
-from acodsp.pct6 import (
+from atf_dsp.transport import Frame, Link
+from atf_dsp.protocol import Protocol
+from atf_dsp.params import ParamMap
+from atf_dsp.models import model_for_pid, at01_for_model, model_info, topology_for_model
+from atf_dsp.device import Device, ApplyError
+from atf_dsp import encoding
+from atf_dsp.controls import Controls, NotConfirmedError
+from atf_dsp.channels import ChannelModel, InputChannel, OutputChannel, VirtualChannel, RoutingMatrix, Routing
+from atf_dsp.channels import crossover_characteristic
+from atf_dsp.rta import RTA
+from atf_dsp.analyzer import InputAnalyzer, Spectrum, read_input
+from atf_dsp.pct6 import (
     Setup,
     SetupMetadata,
     Channel,
@@ -36,7 +36,7 @@ from acodsp.pct6 import (
     Pct6Error,
     Pct6PasswordError,
 )
-from acodsp.validate import (
+from atf_dsp.validate import (
     TestVector,
     Tolerance,
     DEFAULT_TOL,

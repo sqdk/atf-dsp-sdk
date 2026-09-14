@@ -12,10 +12,10 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional, Union
 
-from acodsp import encoding
-from acodsp.contract import load_contract
-from acodsp.device import AddrOrName, Device
-from acodsp.encoding import EQ_STORAGE_ORDER, UNITY
+from atf_dsp import encoding
+from atf_dsp.contract import load_contract
+from atf_dsp.device import AddrOrName, Device
+from atf_dsp.encoding import EQ_STORAGE_ORDER, UNITY
 
 MUTE_RAW = 0x00000000
 UNMUTE_RAW = UNITY  # 0x01000000

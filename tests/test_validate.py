@@ -1,9 +1,9 @@
-"""Offline tests for the end-to-end validation harness (acodsp.validate).
+"""Offline tests for the end-to-end validation harness (atf_dsp.validate).
 
 All offline against the MEMORY-BACKED dry-run Link (writes round-trip). Covers both
 directions of the PC-Tool-oracle validation:
 
-* Direction B — ``exercise_all`` writes the full deterministic test vector through the acodsp
+* Direction B — ``exercise_all`` writes the full deterministic test vector through the atf_dsp
   control setters and reads every cell back within tolerance (proves persistence + encode/decode
   inverse + SafeLoad; PARTIALLY CIRCULAR — same encoders both ends).
 * Direction A — ``from_device`` -> ``save`` -> ``assert_matches_pct6`` validates the ``.pct6``
@@ -11,7 +11,7 @@ directions of the PC-Tool-oracle validation:
 
 Plus: the crossover corner/slope recovery in isolation, the tolerance helpers, that a deliberate
 mutation is CAUGHT (the harness is not vacuous), and that snapshot/restore leaves the device
-clean. Any REAL-device path is guarded behind the existing ``ACODSP_HW`` hardware gate.
+clean. Any REAL-device path is guarded behind the existing ``ATF_DSP_SDK_HW`` hardware gate.
 """
 from __future__ import annotations
 
@@ -20,11 +20,11 @@ from pathlib import Path
 
 import pytest
 
-from acodsp.device import Device
-from acodsp.params import ParamMap
-from acodsp.pct6 import Setup
-from acodsp.transport import Link
-from acodsp import validate as V
+from atf_dsp.device import Device
+from atf_dsp.params import ParamMap
+from atf_dsp.pct6 import Setup
+from atf_dsp.transport import Link
+from atf_dsp import validate as V
 
 
 def make_device() -> Device:
@@ -77,7 +77,7 @@ def test_exercise_all_catches_a_mutation():
     # apply, then corrupt Output A's gain cell so the readback disagrees with the vector
     V._apply_vector(dev.model, vec, allow_unsafe=True)
     a_gain = dev.model.output("A").resolve_gain().name
-    from acodsp import encoding
+    from atf_dsp import encoding
     dev.link.mem[dev._resolve_addr(a_gain)] = encoding.to_bytes_be(encoding.gain_db_to_raw(+11.0))
     rep = V.Report(direction="mut")
     V._readback_and_check(dev, vec, rep, V.DEFAULT_TOL)
@@ -159,12 +159,12 @@ def test_report_summary_and_bool():
 
 
 # --------------------------------------------------------------------------- hardware gate
-_HW_PORT = os.environ.get("ACODSP_HW")
-_HW_WRITE = os.environ.get("ACODSP_HW_WRITE") == "1"
+_HW_PORT = os.environ.get("ATF_DSP_SDK_HW")
+_HW_WRITE = os.environ.get("ATF_DSP_SDK_HW_WRITE") == "1"
 
 
 @pytest.mark.skipif(not (_HW_PORT and _HW_WRITE),
-                    reason="set ACODSP_HW=<port> and ACODSP_HW_WRITE=1 to run the on-amp harness")
+                    reason="set ATF_DSP_SDK_HW=<port> and ATF_DSP_SDK_HW_WRITE=1 to run the on-amp harness")
 def test_exercise_all_on_real_hardware():
     """On-amp Direction B: snapshot -> write the full vector -> read back -> restore.
 

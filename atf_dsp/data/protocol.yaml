@@ -1,5 +1,5 @@
 # protocol.yaml — machine-readable contract for the Audiotec Fischer ACO DSP protocol
-# Consumed by acodsp (see docs/conductor-protocol.md and docs/encoding.md).
+# Consumed by atf_dsp (see docs/conductor-protocol.md and docs/encoding.md).
 # Every entry is evidence-backed: firmware disassembly (App_M5.4DSP_Release.bin, ARM Cortex-M,
 # base 0x4000) and/or hardware capture. Findings that rested on an assumption were put through
 # adversarial subagent review (independent re-derivation attempting to REFUTE) before being

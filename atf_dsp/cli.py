@@ -1,4 +1,4 @@
-"""cli.py — the `acodsp` command-line entry point.
+"""cli.py — the `atf-dsp-sdk` command-line entry point.
 
 Commands: list | identify | get-setup | set-setup N | read <name|addr> |
 write <name|addr> <hex>. Writes support --dry-run.
@@ -9,9 +9,9 @@ import argparse
 import sys
 from typing import Optional
 
-from acodsp.device import Device
-from acodsp.models import PID_MODELS, model_for_pid
-from acodsp.transport import ATF_VID, find_atf_ports
+from atf_dsp.device import Device
+from atf_dsp.models import PID_MODELS, model_for_pid
+from atf_dsp.transport import ATF_VID, find_atf_ports
 
 
 def _hexs(b: bytes) -> str:
@@ -93,7 +93,7 @@ def cmd_write(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="acodsp", description="Audiotec Fischer ACO DSP control")
+    ap = argparse.ArgumentParser(prog="atf-dsp-sdk", description="Audiotec Fischer ACO DSP control")
     ap.add_argument("--verbose", action="store_true", help="print TX/RX frames")
     sub = ap.add_subparsers(dest="cmd", required=True)
 

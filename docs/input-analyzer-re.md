@@ -142,7 +142,7 @@ promoted out of PROVISIONAL 2026-08-29.
 
 ## 4. Correction to the existing `rta` contract
 
-`protocol.yaml.rta` (status: partial) and `acodsp/rta.py` currently treat `channel_select = 8541`
+`protocol.yaml.rta` (status: partial) and `atf_dsp/rta.py` currently treat `channel_select = 8541`
 (`MOD_INPUT_LEVEL_CHANNELSELECT`, a MonoMux) as the analyzer channel select, and list a flat set of
 readback cells. That conflates **two different features**:
 
@@ -153,7 +153,7 @@ readback cells. That conflates **two different features**:
 
 `protocol.yaml` is intentionally **left unchanged** for now (mechanism is static-only, not hardware
 -validated). This doc is the record; fold into `protocol.yaml.rta` once a live capture/tone test
-confirms it. New PROVISIONAL code lives in `atf_dsp_control/acodsp/analyzer.py` (does not touch the
+confirms it. New PROVISIONAL code lives in `atf_dsp_control/atf_dsp/analyzer.py` (does not touch the
 existing `rta.py`).
 
 ## 5. Evidence index (addresses in the exe unless noted)

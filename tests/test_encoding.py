@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from acodsp import encoding
-from acodsp.encoding import (
+from atf_dsp import encoding
+from atf_dsp.encoding import (
     FRAC_BITS,
     UNITY,
     biquad_rbj,

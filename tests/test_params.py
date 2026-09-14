@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from acodsp.params import ParamMap, parse_at01_text
+from atf_dsp.params import ParamMap, parse_at01_text
 
 SAMPLE = """\
 #define HEADERVERSION N6

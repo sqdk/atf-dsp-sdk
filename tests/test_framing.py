@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from acodsp.transport import (
+from atf_dsp.transport import (
     CMD_START,
     RESP_START,
     build_frame,

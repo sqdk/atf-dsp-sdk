@@ -1,4 +1,4 @@
-# Channel model (`acodsp.channels`)
+# Channel model (`atf_dsp.channels`)
 
 The channel model raises the raw `MOD_..._ADDR` parameter surface to the PC-Tool's
 mental model: physical **inputs**, **virtual** (tuning) channels, physical
@@ -10,7 +10,7 @@ sources, never from hardcoded per-model logic:
 1. **Structure** — `tools/discover_channels.discover()` reads the inflated `.at01`
    and derives input/output counts + letters, EQ blocks + band counts, gain/delay/
    mute/xover families, and the routing-matrix dimensions.
-2. **Semantics** — `acodsp/data/<model>.channels.yaml` supplies the layer that can't
+2. **Semantics** — `atf_dsp/data/<model>.channels.yaml` supplies the layer that can't
    be derived from names: human labels, which EQ block belongs to which channel
    class, virtual-channel identities, and routing orientation.
 
@@ -20,7 +20,7 @@ layer is still built from discovery with generic labels.
 ## Usage
 
 ```python
-from acodsp import Device
+from atf_dsp import Device
 
 with Device.connect() as dev:                       # auto-detect by USB VID
     dev.model.output("A").gain(-3).delay_ms(2.5)     # fluent, chainable
@@ -162,7 +162,7 @@ keeps a small deprecated shim (`.read`/`.as_grid`/`.cell_param`/`.route`/`.rows`
 
 ## Correcting the provisional guesses (one-line overlay edits)
 
-All of the above live in `acodsp/data/MatchM54DSP.channels.yaml`. The engine reads
+All of the above live in `atf_dsp/data/MatchM54DSP.channels.yaml`. The engine reads
 these — nothing is hardcoded — so a PC-Tool screenshot is corrected by editing the
 overlay only:
 
