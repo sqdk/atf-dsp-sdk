@@ -22,10 +22,9 @@ Analyzer — from macOS, Linux, or Windows.
 pip install -e .
 ```
 
-The core package needs only `pyserial` and `PyYAML`. Optional extras:
+The core package needs only `pyserial` and `PyYAML`. For development:
 
-- `pip install -e '.[usb]'` — pyusb (raw-USB fallback)
-- `pip install -e '.[encoding]'` — numpy (fixed-point helpers)
+- `pip install -e '.[dev]'` — pytest (test suite)
 
 ## Quickstart — CLI
 

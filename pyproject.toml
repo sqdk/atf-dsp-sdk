@@ -13,8 +13,6 @@ authors = [{ name = "Christian Probst" }]
 dependencies = ["pyserial>=3.5", "PyYAML>=5.4"]
 
 [project.optional-dependencies]
-usb = ["pyusb>=1.2"]
-encoding = ["numpy>=1.21"]
 dev = ["pytest>=7.0"]
 
 [project.scripts]
