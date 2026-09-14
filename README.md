@@ -131,10 +131,50 @@ PID→model table in [`atf_dsp/models.py`](atf_dsp/models.py) covers the current
 **MATCH / HELIX / BRAX** range (from the MATCH UP / M series through HELIX DSP /
 V-series to BRAX DSP), so any ACO device should enumerate and identify.
 
-Parameter maps are generated from the vendor `.at01` device file
-(`tools/build_param_maps.py`); **raw vendor files are never committed**. The
-repository ships a generated map for the **MATCH M 5.4DSP** only — for another
-model, point the tool at that model's `.at01` to build its map.
+Parameter maps are **generated**, not hand-written. Each is derived from the
+model's `.at01` **device file** — the SigmaStudio parameter export (name → DSP
+address) that ships inside the DSP PC-Tool install under `.../app/deviceFiles/`,
+one per model. A single PC-Tool installation therefore already contains the
+device file for *every* ACO model, whether or not you own that amp. (An `.at01`
+is not a saved tune — that's a **`.pct6`** setup/project file, handled
+separately.) `tools/build_param_maps.py` inflates an `.at01` and writes the
+`{name: address}` JSON; **only the generated JSON is committed, never the raw
+`.at01`.**
+
+The repository ships a generated map for the **MATCH M 5.4DSP** only — the model
+that has been hardware-validated. Maps for the other ACO models can be generated
+identically from the same PC-Tool install (the shipped `model_topology.json`,
+which covers 32 models, was itself built by scanning those device files). They
+are not shipped by default only to keep the package small and to avoid implying
+validated support for models exercised on paper alone — generating them is no
+different from the map that already ships.
+
+### Adding another model
+
+1. Find the model's `.at01` in your DSP PC-Tool install
+   (`.../app/deviceFiles/`), e.g. `HelixDSP3.at01`. The basename must match the
+   one mapped for that model in [`atf_dsp/models.py`](atf_dsp/models.py)
+   (`MODEL_AT01`).
+2. Generate the parameter map:
+   ```bash
+   python tools/build_param_maps.py /path/to/HelixDSP3.at01 --out atf_dsp/data
+   # …or build every model found in the folder at once:
+   python tools/build_param_maps.py --scan /path/to/deviceFiles --out atf_dsp/data
+   ```
+   This writes `atf_dsp/data/<basename>.json`.
+3. Raw parameter read/write, the protocol layer, and the CLI now work for that
+   model (pass `--model "<name>"`, or let `identify` detect it by USB PID).
+4. For the high-level **channel model**, add a per-model semantic overlay
+   `atf_dsp/data/<basename>.channels.yaml` (channel labels, EQ-block roles,
+   virtual-channel identities, routing orientation). Without it the physical
+   layer still loads — you get raw addressing by name — but the labelled channel
+   semantics won't be right. Use the shipped `MatchM54DSP.channels.yaml` as a
+   template.
+
+> **Not hardware-validated beyond the MATCH M 5.4DSP.** Every ACO model shares
+> one firmware and the same encoders, so a generated map is *expected* to work —
+> but it is unverified. Read back what you write, keep amp gain low, and mind the
+> encoder gates, which exist precisely for untested paths.
 
 ## Hardware validation
 
