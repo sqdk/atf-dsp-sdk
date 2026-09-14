@@ -3,8 +3,8 @@
 
 Scans the vendor ``.at01`` device files, inflates each, runs the model-agnostic
 ``discover_channels.discover`` on it, and writes a SMALL summary table to
-``acodsp/data/model_topology.json`` (input/output/routing/EQ counts per model, plus a
-``complete`` flag). This lets ``acodsp.model_info`` report a model's channel topology
+``atf_dsp/data/model_topology.json`` (input/output/routing/EQ counts per model, plus a
+``complete`` flag). This lets ``atf_dsp.model_info`` report a model's channel topology
 WITHOUT shipping the large (~300 KB each) full param maps — important for the dsp-web
 Pyodide bundle, which only needs counts to size its UI and guard untested hardware.
 
@@ -24,14 +24,14 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 sys.path.insert(0, str(REPO_ROOT / "tools"))
 
-from acodsp.models import MODEL_AT01  # noqa: E402
-from acodsp.params import parse_at01_text  # noqa: E402
+from atf_dsp.models import MODEL_AT01  # noqa: E402
+from atf_dsp.params import parse_at01_text  # noqa: E402
 from build_param_maps import inflate_at01  # noqa: E402
 from discover_channels import discover  # noqa: E402
 
 WORKSPACE = Path("/Users/cp/Documents/code/atf_disassemble")
 DEFAULT_DEVICEFILES = WORKSPACE / "extracted" / "app" / "deviceFiles"
-DEFAULT_OUT = REPO_ROOT / "acodsp" / "data" / "model_topology.json"
+DEFAULT_OUT = REPO_ROOT / "atf_dsp" / "data" / "model_topology.json"
 
 # basename -> model name (reverse of MODEL_AT01).
 _AT01_MODEL = {v: k for k, v in MODEL_AT01.items()}

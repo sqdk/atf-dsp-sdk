@@ -3,15 +3,15 @@ from __future__ import annotations
 
 import pytest
 
-from acodsp import protocol
-from acodsp.protocol import (
+from atf_dsp import protocol
+from atf_dsp.protocol import (
     encode_get,
     encode_identify,
     encode_read_param,
     encode_select_setup,
     encode_write_param,
 )
-from acodsp.transport import build_frame
+from atf_dsp.transport import build_frame
 
 
 def test_select_setup_payload_bytes():

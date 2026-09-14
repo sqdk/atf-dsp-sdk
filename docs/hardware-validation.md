@@ -1,7 +1,7 @@
-# Hardware validation runbook — proving acodsp SET/READ against the DSP PC-Tool
+# Hardware validation runbook — proving atf_dsp SET/READ against the DSP PC-Tool
 
 This is the procedure that turns "the offline suite is green" into "the amp agrees, and the
-PC-Tool agrees." The harness lives in `acodsp/validate.py`; the on-amp gate is `ACODSP_HW`.
+PC-Tool agrees." The harness lives in `atf_dsp/validate.py`; the on-amp gate is `ATF_DSP_SDK_HW`.
 
 ## Why two directions (read this first)
 
@@ -27,7 +27,7 @@ Every comparison is tolerance-aware because the DSP round-trip is lossy by const
 - **Frequencies/gains** quantize through 8.24 fixed point.
 - **Delay** is an **integer sample** count; **crossover corner** is recovered from the pole coeffs.
 
-`DEFAULT_TOL` (`acodsp.validate.Tolerance`): **±0.5 Hz or ±1 %** (whichever larger) on frequency,
+`DEFAULT_TOL` (`atf_dsp.validate.Tolerance`): **±0.5 Hz or ±1 %** (whichever larger) on frequency,
 **±0.02** on Q, **±0.1 dB** on gain, **±1 sample** on delay, **±0.1 dB** on a routing mix cell.
 Only **DSP-backed** fields are compared. The **lossy `.pct6` fields are skipped/annotated, never
 asserted**: channel role code `CN`, channel display names, `EqBy`/`CE`/UI flags, routing
@@ -58,7 +58,7 @@ just a shape check. Coverage:
 
 ### 1. Direction B — on the amp (SDK writes → SDK reads)
 ```bash
-ACODSP_HW=/dev/cu.usbmodemXXXX ACODSP_HW_WRITE=1 \
+ATF_DSP_SDK_HW=/dev/cu.usbmodemXXXX ATF_DSP_SDK_HW_WRITE=1 \
   .venv/bin/python -m pytest atf_dsp_control/tests/test_validate.py -k on_real_hardware -q
 ```
 `exercise_all(device, snapshot=True)` snapshots every touched cell, writes the whole vector,
@@ -68,7 +68,7 @@ that is Direction A.
 
 Or interactively, leaving the setup on the amp for the PC-Tool to read:
 ```python
-from acodsp import Device, build_test_vector, exercise_all
+from atf_dsp import Device, build_test_vector, exercise_all
 dev = Device.connect(port="/dev/cu.usbmodemXXXX")
 vec = build_test_vector(dev.model)
 rep = exercise_all(dev, vec, snapshot=False)   # PERSIST so the PC-Tool can read it back
@@ -89,7 +89,7 @@ amp** — it is entirely file-to-file. There is exactly one oracle path:
 2. **File → Save As** → `oracle.pct6`.
 3. Assert our decode matches the values you entered:
    ```python
-   from acodsp import assert_matches_pct6, build_test_vector, Device
+   from atf_dsp import assert_matches_pct6, build_test_vector, Device
    vec = build_test_vector(Device.connect(port="…", model="MATCH M 5.4DSP").model)
    print(assert_matches_pct6("oracle.pct6", vec).summary())
    ```

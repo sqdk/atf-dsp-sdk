@@ -45,7 +45,7 @@ Call chain: dispatcher case 2/3 → `FUN_00005da0`/`FUN_00005d28`/`FUN_00005b6c`
   (0xFF ⇒ direct; else SafeLoad iff payload len < 0x1a), bytes[3:5]=addr BE, bytes[5:]=data BE.
 
 ### Hardware read-only confirmation (2026-08-26, live M 5.4DSP on /dev/cu.usbmodem101)
-Read-only pass via the `acodsp` library (no writes, no side effects):
+Read-only pass via the `atf_dsp` library (no writes, no side effects):
 - **`0x02` DSP read works on hardware.** Returns 4-byte values.
 - **8.24 CONFIRMED LIVE:** Output A gain reads back `01000000` = exactly +1.000000 (0 dB unity) —
   the DSP's own default value, not host-written. 5.23 unity would be `00800000`. Independent

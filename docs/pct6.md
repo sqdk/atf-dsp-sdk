@@ -1,6 +1,6 @@
-# `acodsp.pct6` — reading & writing DSP PC-Tool setup files
+# `atf_dsp.pct6` — reading & writing DSP PC-Tool setup files
 
-`acodsp/pct6.py` turns an encrypted DSP PC-Tool `.pct6` / `.afpx` setup file into a
+`atf_dsp/pct6.py` turns an encrypted DSP PC-Tool `.pct6` / `.afpx` setup file into a
 structured `Setup` model, writes it back (Phase D), and applies it onto a connected
 `Device` (dry-run by default). The crypto/container scheme is the CONFIRMED one from
 `docs/pct6-format.md` (Phases A+B) — this module ports it and layers the Phase C model
@@ -63,7 +63,7 @@ lists any encountered codes we could not map (empty for the shipped sample).
 ## Usage
 
 ```python
-from acodsp import Setup, Device, Link, ParamMap
+from atf_dsp import Setup, Device, Link, ParamMap
 
 setup = Setup.load("UP_8BMW_PP-BMW1_7Hifi_Basic.pct6")
 print(setup.summary())

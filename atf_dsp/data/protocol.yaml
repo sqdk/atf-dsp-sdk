@@ -1,0 +1,387 @@
+# protocol.yaml — machine-readable contract for the Audiotec Fischer ACO DSP protocol
+# Consumed by atf_dsp (see docs/conductor-protocol.md and docs/encoding.md).
+# Every entry is evidence-backed: firmware disassembly (App_M5.4DSP_Release.bin, ARM Cortex-M,
+# base 0x4000) and/or hardware capture. Findings that rested on an assumption were put through
+# adversarial subagent review (independent re-derivation attempting to REFUTE) before being
+# marked `confirmed`; see docs/protocol-evidence.md for the refutation logs.
+#
+# status vocabulary:
+#   confirmed          — firmware-proven AND (hardware-verified OR adversarially reviewed)
+#   firmware           — firmware-proven, not yet exercised on hardware
+#   hypothesis         — derived/cross-checked from docs; needs a capture or hardware write to confirm
+#   partial            — mechanism known, exact detail (cadence / full field set) needs a capture
+version: 0.1.0
+
+device:
+  vid: 0x2E4F
+  # PID -> model (full table lives in atf_dsp.py PID_MODELS / models.py); firmware is shared
+  # across all 35 ACO models, so the command/transport layer generalizes.
+  primary: { pid: 0x2008, model: "MATCH M 5.4DSP" }
+  dsp: "Analog Devices ADAU1452 (SIGMA300 / ADAU145x)"
+
+transport:
+  kind: usb-cdc-acm         # macOS /dev/cu.usbmodem*, Windows COMx (bundled usbser INF)
+  select_by: vid            # baud irrelevant on USB-CDC; 115200 is a harmless default
+  note: "opening a macOS cu.usbmodem toggles DTR -> settle + retry the first read"
+
+# ---------------------------------------------------------------------------
+# FRAMING — ASYMMETRIC. Verified from firmware RX deframer FUN_0000481e and TX
+# framer FUN_000048d0, and hardware-confirmed both directions (2026-08-25).
+# ---------------------------------------------------------------------------
+framing:
+  cmd_start:  0x42          # 'B'  host->device;  LEN = payload_len + 1
+  resp_start: 0x43          # 'C'  device->host;  LEN = payload_len
+  type_byte:  0x01          # fixed
+  len_complement: true      # 3rd header byte = (~LEN) & 0xFF; reject on mismatch
+  checksum: "sum(payload) & 0xFF"   # 8-bit sum of payload bytes only; reject on mismatch
+  cmd_layout:  "0x42 | (payload_len+1) | ~LEN | 0x01 | payload | SUM(payload)&0xFF"
+  resp_layout: "0x43 | payload_len     | ~LEN | 0x01 | payload | SUM(payload)&0xFF"
+  status: confirmed
+  evidence: "FUN_0000481e (state machine: state0 cmp 'B'; state2 delivers LEN-1 payload bytes);
+             FUN_000048d0 (TX 0x43/LEN). Hardware round-trip 2026-08-25. Adversarial review of
+             FUN_0000481e caught an earlier wrong 0x43/len assumption for the command direction."
+
+# ---------------------------------------------------------------------------
+# DISPATCH — command handler FUN_00004aec switches on payload[0] (the opcode).
+# A pre-switch gate (iVar7 = FUN_0000ae30()) restricts which opcodes run when a
+# controller/remote is active: when active ONLY {0x07,0x08,0x13,0x28..0x2b} are
+# accepted; everything else (incl. 0x02/0x03/0x1F) requires the un-gated state.
+# ---------------------------------------------------------------------------
+dispatch:
+  handler: FUN_00004aec
+  gate:
+    when_controller_active_allow_only: [0x07, 0x08, 0x13, 0x28, 0x29, 0x2a, 0x2b]
+    evidence: "FUN_00004aec @0x4b04-0x4b18: iVar7=FUN_0000ae30(); reject unless opcode in {7,8,0x13,0x28..0x2b}"
+  response_by: FUN_000048d0   # (*DAT_00004e10)(class, respbuf, resp_len)
+
+opcodes:
+  - code: 0x02
+    name: dsp_read
+    request:  "02 <instance> <addr_hi> <addr_lo> [pad x N]"
+    response: "echoes header + N value bytes"
+    detail: >
+      Reads N bytes from DSP memory. N = payload_len - 4 (the request carries N trailing
+      bytes whose LENGTH sets the read size). addr is 16-bit big-endian. instance must satisfy
+      (instance & 7)==0; use 0. Handler FUN_00005da0 -> SPI read FUN_000053e0: asserts CS,
+      writes 3-byte SPI header `01 <addr_hi> <addr_lo>`, reads N bytes, deasserts.
+    status: firmware
+    evidence: "FUN_00004aec case 2 -> FUN_00005da0 @0x5da0 -> FUN_000053e0 @0x53e0. Read-count
+               convention (N = len-4) needs one hardware capture to confirm the trailing-pad idiom."
+
+  - code: 0x03
+    name: dsp_write
+    request:  "03 <instance> <flag> <addr_hi> <addr_lo> <data...>"
+    detail: >
+      Writes to DSP memory. addr 16-bit big-endian (bytes[3],[4]). instance=byte[1], honored
+      when (instance & 7)==0 (use 0). flag=byte[2]: 0xFF forces a DIRECT write; any other value
+      selects SAFELOAD, but ONLY when total payload length < 0x1a (26); length >= 0x1a always
+      takes the direct path. Data words are 32-bit big-endian and are passed to the DSP verbatim
+      (the firmware does NOT byte-swap — the host MUST supply big-endian, matching the ADAU145x).
+    paths:
+      direct:   "FUN_00005d28 -> FUN_00005344: SPI header `00 <addr_hi> <addr_lo>` then stream data bytes"
+      safeload: "FUN_00005b6c: build block, one burst (see dsp_rw.safeload)"
+    status: confirmed
+    evidence: "FUN_00004aec case 3 @0x4be0. Adversarial review CONFIRMED: 32-bit word size
+               (dispatcher len>>2 ↔ SafeLoad memcpy count*4, gate count<=5); big-endian address
+               (>>8 before &0xff in 3 sites); instance gate is (instance&7)==0 (NOT ==0 — 0/8/16..
+               honored, 8 -> 32-byte block)."
+
+  - code: 0x08
+    name: identify
+    request:  "08 01"
+    response: "model string (e.g. 'M54DSP') + firmware build ('2026.03.11-12:16') + current setup + fault/telemetry bytes"
+    status: confirmed
+    evidence: "FUN_00004aec case 8; hardware 2026-08-25 (model 'M54DSP', fw '2026.03.11-12:16')."
+
+  - code: 0x0e
+    name: reset
+    request:  "0E DE 1E 7E"     # magic
+    detail:   "hard reset; magic bytes DE 1E 7E required"
+    status: firmware
+    evidence: "FUN_00004aec case 0xe (cmp DE,1E,7E)."
+
+  - code: 0x1f
+    name: config_set
+    request:  "1F <a_hi> <a_lo> <sel> <p4> <p5> <p6> <p7>"   # 8-byte payload; handler reads sel=byte[3]
+    detail: >
+      Structured config/setup SET. Handler FUN_00008be8 switches on sel (byte[3]).
+      addr16=(byte[1]<<8)|byte[2]. Sub-ops: 6/7/8 misc setters; 9 = SELECT STORED SETUP (idx=byte[5],
+      0-based); 0xa/0xb/0xe = bounded block writes (setup/coefficient download regions, sizes
+      <=0x220 / <=0x80 / <=0x1000); 0xc = reset magic DE 1E 7E; default = table-mapped setter.
+      This is the PC-Tool's clean, side-effect-free path (no remote engaged -> no mute).
+    subops:
+      0x09: "select stored setup by 0-based index (idx = byte[5])"
+    response: "echoes request"
+    status: confirmed
+    evidence: "FUN_00004aec case 0x1f -> FUN_00008be8 @0x8be8 case 9 -> setter FUN_00006998(idx).
+               Hardware 2026-08-25: switched 7->1->7, enable flag stayed 0 (no remote, no mute)."
+
+  - code: 0x1e
+    name: config_get
+    request:  "1E <a_hi> <a_lo> <sel> <p4> <p5> <p6> <p7>"
+    detail: >
+      Structured config GET — the read twin of 0x1F. Handler FUN_000090ac has the SAME sub-op
+      case table as FUN_00008be8; the `default` sub-op maps a logical id -> (instance, DSP addr)
+      and reads DSP memory into the response. Used to read back config/readback blocks.
+    status: firmware
+    evidence: "FUN_00004aec case 0x1e -> FUN_000090ac @0x90ac (mirror of FUN_00008be8)."
+
+  - code: 0x28
+    name: get_group
+    request:  "28 <sub> [args]"
+    detail:   "GET side of the SCP config/remote group (direction bit: 0x28=GET). Router FUN_00007b3c."
+    subops:
+      0x01: "manual-enable flag (GET)"
+      0x02: "capabilities -> fixed [3,1,1,1,0,2,0,1,0]"
+      0x03: "info block (0x20 bytes)"
+      0x10: "source/input config (0xff => full 8-source map; else one source)"
+      0x13: "remote volume (16-bit) readback"
+      0x20: "source-mode / config (6 bytes)"
+      0x21: "stored byte"
+      0x40: "current active setup (GET)"
+      0x50: "telemetry (supply voltage / temperature)"
+      0x51: "slot-enabled map"
+    status: confirmed
+    evidence: "FUN_00004aec case 0x28/0x29 -> FUN_00007b3c @0x7b3c. GET side hardware-confirmed
+               2026-08-25: 28 40 (setup), 28 01 (enable), 28 20 (source cfg 6B), 28 50 (telemetry),
+               28 51 (slot map)."
+
+  - code: 0x29
+    name: set_group_REMOTE
+    request:  "29 <sub> [args]"
+    detail: >
+      SET side of the CONDUCTOR *remote* group. DANGER: enabling the remote (29 20 02 + 29 01 01)
+      hands master volume to the remote and MUTES (volume -> 0 with no remote reporting a level).
+      29 40 NN selects a setup this way but mutes. DO NOT USE for control — use 0x1F for setups.
+    status: confirmed
+    evidence: "Hardware 2026-08-25: the 29 20/29 01/29 40 path switched setups but muted the amp;
+               recovered via PC-Tool / power-cycle."
+
+  - code: 0x2a
+    name: get_group2
+    request: "2A <sub> [args]"
+    detail:  "secondary GET group (router FUN_00007708); status/level dumps (sub 3 -> 0x4e bytes). Partial."
+    status: firmware
+    evidence: "FUN_00004aec case 0x2a/0x2b -> FUN_00007708 @0x7708."
+  - code: 0x2b
+    name: set_group2
+    request: "2B <sub> [args]"
+    detail:  "secondary SET group (router FUN_00007708). Partial."
+    status: firmware
+    evidence: "FUN_00004aec case 0x2a/0x2b -> FUN_00007708."
+
+  # Lower-value opcodes present in the dispatcher but not needed by the control library.
+  # Recorded for completeness (firmware-derived): 0x00,0x01 (paired setters via FUN_000059f0/5a08),
+  # 0x04 (dual status read), 0x05 (source select, arg<=7), 0x07 (key/unlock vs '!ATF#Secure#ACO!'),
+  # 0x09 (timeout/keepalive, default 0x2710), 0x0a (noop), 0x0c (guarded B0..07), 0x0f (3x direct
+  # DSP write), 0x12/0x13 (remote group via FUN_000075c8/FUN_0000769c), 0x14/0x15 (read 0x20000b08
+  # status struct), 0x18 (flag set), 0x19 (magic 0D EB).
+  - code: misc
+    name: misc_firmware_derived
+    status: firmware
+    evidence: "FUN_00004aec full switch dump — see docs/protocol-evidence.md."
+
+# ---------------------------------------------------------------------------
+# DSP READ/WRITE FORMAT (S2) — the core tuning primitive. CONFIRMED (firmware +
+# two independent adversarial reviews). The ACO opcode 0x02/0x03 are thin
+# pass-throughs to the ADAU145x native SPI (first byte 00=write/01=read, then
+# 16-bit big-endian word address, then big-endian data).
+# ---------------------------------------------------------------------------
+dsp_rw:
+  word_size: 4                 # 32-bit words; param map addresses are 1 address per 32-bit word
+  byte_order: big              # address AND data are MSB-first; host must emit big-endian data
+  instance: { valid_mask: 0x07, use: 0 }   # honored when (instance & 7)==0
+  read:
+    opcode: 0x02
+    request: "02 <instance> <addr_hi> <addr_lo> [N pad bytes]"
+    returns: "N value bytes (N = payload_len - 4)"
+    status: confirmed   # hardware-confirmed 2026-08-26 (read Output A gain = 01000000 = 8.24 unity)
+  write_direct:
+    opcode: 0x03
+    request: "03 <instance> 0xFF <addr_hi> <addr_lo> <data BE...>"   # flag 0xFF forces direct
+  write_safeload:
+    opcode: 0x03
+    request: "03 <instance> <flag!=0xFF> <addr_hi> <addr_lo> <data BE...>"   # total payload len < 0x1a
+    max_data_words: 5
+  # HARDWARE-CONFIRMED write (2026-08-26): opcode 0x03 works both direct (flag=0xFF) and
+  # firmware-SafeLoad (flag!=0xFF); gain/EQ round-trip verified. IMPORTANT: let the ACO firmware
+  # perform the SafeLoad (send 0x03 with the safeload selector) — it reads the true window base at
+  # runtime (RAM 0x20000c22). Do NOT build the SafeLoad block host-side to a fixed base like 0x0014;
+  # that base is compiler-assigned per unit and host-side writes there silently no-op.
+  safeload:
+    mechanism: >
+      FUN_00005b6c builds a 28-byte block (7 consecutive 32-bit big-endian words) and writes it in
+      ONE burst (via the direct-write path) to a SafeLoad window whose base address is read at
+      runtime from RAM 0x20000c22 (FUN_00005c5c, instance 0). Block layout:
+        words[0..4] : up to 5 data words (zero-padded)   bytes [0..19]
+        word[5]     : target DSP address (big-endian)    bytes [22]=addr_hi, [23]=addr_lo
+        word[6]     : NUM words (the trigger)            byte  [27]=word_count
+      Writing the NUM word triggers the atomic load (glitch-free live update). A separate 2-byte
+      SafeLoad-enable register write (reg 0xf899) may precede the burst.
+    block_bytes: 28            # 32 for the instance-bit3 variant (count then lands at byte[31])
+    trigger: "NUM-words word (last word of the block); 1..5 words; fires on next audio frame"
+    corresponds_to:
+      # ADAU1452 datasheet Table 58 default SafeLoad addresses (compiler may reassign; the RE'd
+      # runtime window base at RAM 0x20000c22 is the actual base in use).
+      data_safeload:    [0x0014, 0x0015, 0x0016, 0x0017, 0x0018]   # 5 data slots
+      address_safeload: 0x0019   # target param-RAM addr (auto-increments per data word)
+      num_safeload:     0x001A   # word count AND trigger
+    min_frame_spacing_us_48k: 20.83   # >= 1 audio frame between safeloads or data corrupts
+  status: confirmed
+  evidence: >
+    FUN_00004aec case 3; FUN_00005da0/FUN_000053e0 (read), FUN_00005d28/FUN_00005344 (direct write),
+    FUN_00005b6c (safeload), FUN_00005c5c (window base). Two adversarial reviews CONFIRMED word_size=4,
+    big-endian address (3 enforcement sites) + data passthrough, and the exact SafeLoad byte offsets
+    [22]/[23]/[27]. Correction from review: instance gate is (instance&7)==0, not ==0. NOT yet
+    exercised on hardware (round-trip read/write pending) — 'confirmed' here is firmware+review.
+
+# ---------------------------------------------------------------------------
+# VALUE ENCODERS (S3) — per control TYPE. The value math is generic SIGMA300
+# fixed-point / RBJ biquad, NOT ACO-specific. Populated from the SIGMA300
+# fixed-point research + MCUdude/SigmaDSP cross-check; each entry validated
+# against a .AF1 reference and (pending) one hardware write. See docs.
+# ---------------------------------------------------------------------------
+encoders:
+  _fixed_point:
+    format: "8.24"            # ADAU1452 native: 8 integer + 24 fractional, 32-bit
+    frac_bits: 24
+    signed: twos_complement
+    unity: 0x01000000         # +1.0
+    minus_one: 0xFF000000
+    clamp: [-128.0, 127.99999994]   # 0x80000000 .. 0x7FFFFFFF
+    to_raw: "raw = clamp(round(value * 2**24))   # 2**24 = 16777216"
+    from_raw: "value = int32_signed(raw) / 2**24"
+    byte_order: big           # words emitted MSB-first (matches dsp_rw.byte_order)
+    status: confirmed
+    evidence: >
+      Quadruple-confirmed — incl. HARDWARE (2026-08-26): Output A gain read back live as
+      0x01000000 = exactly +1.000000 (8.24 unity, the DSP's own default; 5.23 would be 0x00800000).
+      (1) ADI ADAU1452/1451/1450 datasheet Rev C p.76-77: 8.24 format,
+      unity=0x01000000, sentinels 0x00800000=0.5 / 0x02000000=2.0. (2) Empirical: the AF1 default
+      image (MatchM54DSP_1.AF1) contains 792 word-aligned 0x01000000 words (unity gains + bypassed
+      biquad B0), vs ~0 aligned 5.23-unity (0x00800000) -> format is 8.24, not the ADAU170x 5.23.
+      (3) Byte order literally 01 00 00 00 = big-endian, matching the S2 SPI finding. NOTE: the
+      ADAU170x/MCUdude 2**23 (5.23) does NOT apply to this chip.
+  gain:
+    kind: fixed_point
+    to_raw: "raw = to_fixed(10**(dB/20))   # 8.24"
+    examples: { "0dB": 0x01000000, "-6dB": 0x00804DCE, "-9dB": 0x005AD50D, "+6dB": 0x01FEC983, "-60dB": 0x00004189 }
+    # Channel gain/level lives in the per-channel GAIN/MUTE cell (a gain value, or 0 = mute):
+    channel_gain:
+      output:  "MOD_OUTPUTMUTE_ALG0_MUTE{index}"    # output A..I = MUTE0..8 (hw-confirmed 2026-08-26)
+      virtual: "MOD_VCPMUTE_ALG0_MUTE{index}"       # virtual A..I = MUTE0..8 (VCP = Virtual Channel Processing)
+      note: "output gain also mirrored in MOD_REDUCEDGAIN (slewed); MOD_GAIN_GAIN{A..I} is NOT the channel gain."
+    status: confirmed
+    evidence: >
+      8.24 gain multiplier (datasheet + AF1 unity). HARDWARE cross-ref (2026-08-26): PC-Tool Output A
+      gain -6 dB read back at MOD_OUTPUTMUTE_ALG0_MUTE0 = 0x00804DCE; Virtual A gain -9 dB at
+      MOD_VCPMUTE_ALG0_MUTE0 = 0x005AD50C. (Corrected a library bug: output.gain() had targeted
+      MOD_GAIN_GAIN{letter}, which read unity — wrong cell.)
+  mute:
+    kind: flag
+    values: { unmute: 0x01000000, mute: 0x00000000 }
+    detail: "the per-channel GAIN/MUTE cell doubles as mute: 0 = mute, else the gain. Output =
+             MOD_OUTPUTMUTE_ALG0_MUTE{index}, virtual = MOD_VCPMUTE_ALG0_MUTE{index}, input =
+             MOD_INPUTGAIN_ALG0_MUTE{index}. NB: since gain+mute share the cell, unmute writes 0 dB
+             (unity) — set a level with gain() after unmuting."
+    address_pattern: "*MUTE*"
+    status: confirmed
+    evidence: "hardware: the OUTPUTMUTE/VCPMUTE cells hold the channel gain (0x00804DCE=-6dB etc.), 0=mute."
+  delay:
+    kind: sample_count        # 32.0 integer format (NOT 8.24)
+    fs: 48000                 # CONFIRMED (see below)
+    to_raw: "samples = round(ms/1000 * 48000)   # integer, stored as 32-bit"
+    examples_48k: { "5ms": 0x000000F0, "10ms": 0x000001E0, "100ms": 0x000012C0 }
+    address_pattern: "MOD_DELAY_*"
+    status: confirmed
+    evidence: >
+      HARDWARE cross-reference vs PC-Tool (2026-08-26): set Output A delay = 5.00 ms in DSP PC-Tool,
+      read back 0x000000F0 = 240 samples. 240/48000 = exactly 5.000 ms (96 kHz would be 480). So
+      fs = 48 kHz and delay = integer sample count (32.0). fs=48k independently corroborated by the
+      EQ cross-ref (biquad coeffs match at 48k, not 96k).
+  eq_band:
+    kind: biquad
+    stages: 5                 # a0 normalized out -> 5 stored coefficients
+    storage_order: [B2, B1, B0, A2, A1]      # confirmed from at01 consecutive addresses
+    coeffs: "RBJ cookbook -> normalize by a0 -> store b2/a0, b1/a0, b0/a0, -a2/a0, -a1/a0"
+    sign_convention: "SigmaStudio inverts a1,a2 in RAM (store -a1/a0, -a2/a0) — ADI wiki confirmed"
+    fs_default: 48000
+    address_pattern: "MOD_EQUALIZER_*_STAGE*_{B2,B1,B0,A2,A1} / MOD_FILTERS_*"
+    example:
+      spec: "+6dB peaking, f0=1kHz, Q=1.0, fs=48k"
+      words_8_24: { B2: 0x00DE230C, B1: 0xFE1ACC43, B0: 0x010B4082, A2: 0xFF169C71, A1: 0x01E533BD }
+    status: confirmed
+    evidence: >
+      at01 order STAGE{n}_B2,B1,B0,A2,A1 confirmed by inspection; RBJ math + a1/a2 inversion from
+      ADI SigmaStudio wiki; 5-coeff biquad matches datasheet SafeLoad ('five coefficients', p.80).
+      HARDWARE cross-reference vs PC-Tool (2026-08-26): set output Fine EQ = 1 kHz / +6 dB / Q 2.0;
+      read back the stage coeffs [B2,B1,B0,A2,A1] = [+0.9324,-1.9381,+1.0225,-0.9548,+1.9381], which
+      equal our biquad_rbj('peaking',1000,2.0,6,48000) to <1 LSB (8.24). Confirms the biquad encoder,
+      fs=48 kHz (96k would not match), and band ordering (1 kHz -> band 16 -> EQ2 stage 1).
+  crossover:
+    kind: biquad_chain        # cascaded RBJ HP/LP biquads (same 8.24 encoder as eq_band)
+    address_pattern: "MOD_FILTERS__PHASE_12DB_{letter}_ALG0_STAGE{n}_*"
+    stage_layout: { highpass: [0, 1], lowpass: [3, 2] }   # 12dB uses 1st of each pair; 24dB uses both
+    q_table:                  # characteristic -> per-stage Q (RBJ highpass/lowpass)
+      butterworth: { 12: [0.7071], 24: [0.5412, 1.3066] }
+      linkwitz_riley: { 12: [0.5], 24: [0.7071, 0.7071] }
+    status: confirmed         # for Butterworth + Linkwitz-Riley at 12/24 dB (common cases)
+    needs_hardware: "Bessel, and 6/18 dB slopes, not yet mapped"
+    evidence: >
+      HW cross-ref (2026-08-26): set 4 PC-Tool crossovers, read the FILTERS stages.
+      (1) Output A HP 100/Butterworth/12 -> STAGE0 RBJ highpass Q~=0.707. (2) Output A LP 2000/BW/12
+      -> STAGE3 RBJ lowpass (b1 positive). (3) Output B HP 200/Linkwitz-Riley/12 -> STAGE0 with B0=0.9743
+      == our highpass Q=0.5 exactly -> LR12 = Q 0.5. (4) Output C HP 300/BW/24 -> STAGE0+STAGE1 with
+      B0=0.9646/0.9849 == our Q=[0.5412,1.3066] (4th-order Butterworth pair) -> 24 dB = 2 cascaded
+      biquads. So: HP uses stages [0,1], LP uses stages [3,2]; q_table above. All match to ~0.1% (the
+      tool's minor freq/Q quantization). Bessel + 6/18 dB slopes not yet mapped.
+  routing:
+    kind: matrix              # matrix cells = 8.24 linear mix gains; UI % = linear * 100
+    to_raw: "raw = to_fixed(percent/100)   # 100% = 0x01000000, 50% = 0x00800000"
+    input_to_virtual:  "MOD_MAINMATRIX_ALG0_NXNMIXS3004P6ALG2VOL{row=virtual}{col=input}"
+    virtual_to_output: "MOD_NXMLINEAR1_ALG0_NXNMIXS3004P6ALG4VOL{row=output}{col=virtual}"
+    status: confirmed
+    evidence: >
+      HARDWARE (2026-08-26): scanned both matrices live. virtual->output NXMLINEAR1 held the exact
+      "Virtual to Output" screenshot routing (VOL0000/0101/0202/0303=100%, VOL0407/0507/0607/0707/0807=
+      100% = outputs E-I <- Virtual H). Cells are 8.24 linear gains: 100%=0x01000000, 31.5%=0x0050923B,
+      62.9%=0x00A12477. So routing value = percent/100 as 8.24; orientation VOL{dest}{src} confirmed.
+
+# ---------------------------------------------------------------------------
+# RTA / Input Signal Analyzer (S4). Mechanism: CLIENT-POLLED readback cells,
+# not a device push-stream. The PC-Tool selects a channel (channel-select mux)
+# and repeatedly READS peak/RMS readback DSP cells via 0x02 (or 0x1e), then
+# converts the fixed-point readback to a level. Exact cell set + cadence need a
+# capture to confirm.
+# ---------------------------------------------------------------------------
+rta:
+  model: client_polled
+  readback_cells:
+    input_rta:      4957      # MOD_INPUTRTA_RBINPUTRTA1_...VALUE
+    input_peak:     4944      # MOD_INPUT_LEVEL_PEAKREADBACK
+    output_peak:    8451      # MOD_OUTPUT_LEVEL_PEAKREADBACK
+    vcp_peak:       6813      # MOD_VCP_LEVEL_PEAKREADBACK
+    volume_rb:      4600      # MOD_VOLUME_READBACK
+    sigdet:         4958      # MOD_SIGDET_PROCESSING_SIGDETRB
+  channel_select:   8541      # MOD_INPUT_LEVEL_CHANNELSELECT (write to pick RTA input)
+  peak_reset:       8509      # MOD_INPUT_LEVEL_RESETHOLD (write to reset peak-hold)
+  frame_format: "read a 32-bit fixed-point cell via 0x02; convert per encoders._fixed_point"
+  status: partial
+  evidence: "MOD_INPUTRTA module (19 params) + readback cells in MatchM54DSP.at01; 0x1e/0x90ac
+             structured-read path. Exact polling set/cadence needs a PC-Tool capture."
+
+# ---------------------------------------------------------------------------
+# Multi-model (S5): firmware is shared across all 35 ACO models (one codebase,
+# reset vector 0x4751 on most). Framing/opcodes/dsp_rw generalize; per-model
+# deltas are the .at01 param map and PID. Spot-check pending (HELIX DSP.3).
+# ---------------------------------------------------------------------------
+multi_model:
+  shared_codebase: true
+  per_model: [pid, at01_param_map]
+  status: confirmed
+  evidence: >
+    Spot-checked App_DSP3 (HELIX DSP.3): the SafeLoad handler is byte-identical to M5.4DSP's,
+    merely relocated (0x5b6c -> 0x5d98) — same `movs r2,0x20` (32B buffer), `movs r6,0x1c` (28B
+    block), `cmp r4,5 / bhi` (<=5 words), `strb [r2,0x16]`/`[r3,0x17]` (addr_hi/lo at 22/23).
+    Framing/opcodes/dsp_rw generalize; per-model deltas are the .at01 map, PID, and literal-pool
+    RAM addresses only."
