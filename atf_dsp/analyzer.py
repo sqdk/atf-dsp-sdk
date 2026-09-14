@@ -1,8 +1,7 @@
 """analyzer.py — Input Signal Analyzer (ISA) reader.  ***HARDWARE-VALIDATED 2026-08-29 (M 5.4DSP).***
 
-This implements the DSP PC-Tool's electrical, on-chip **Input Signal Analyzer** (the ``InputRTA``
-class in the exe), reverse-engineered statically in ``docs/input-analyzer-re.md`` (RE-0). It is NOT
-the microphone/acoustic RTA.
+This implements the electrical, on-chip **Input Signal Analyzer** documented in
+``docs/input-analyzer.md``. It is NOT the microphone/acoustic RTA.
 
 Mechanism (from the PC-Tool disassembly): the analyzer is a **host-driven, stepped single-bandpass
 sweep**, not an on-chip FFT. For each frequency point the tool
@@ -222,7 +221,7 @@ def read_input(device: Device, input_channel: Optional[int] = None, *, sweep: bo
     - ``sweep=True``: selects the input tap, runs the swept bandpass, and returns a
       :class:`Spectrum`.
 
-    Hardware-validated 2026-08-29 (mechanism + frequency map); see ``docs/input-analyzer-re.md``.
+    Hardware-validated 2026-08-29 (mechanism + frequency map); see ``docs/input-analyzer.md``.
     """
     an = InputAnalyzer(device)
     if sweep:

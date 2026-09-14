@@ -25,8 +25,8 @@ roughly bottom to top, provides:
   (checksummed `B`/`C` envelopes), parameter read/write, and clean setup
   switching (`0x1F`), plus a dry-run mode that builds frames without touching
   hardware.
-- **Parameter maps** — per-model name↔address maps generated from the vendor
-  `.at01` device files, so parameters are addressable by symbolic name.
+- **Parameter maps** — per-model name↔address maps generated from each model's
+  `.at01` parameter definition, so parameters are addressable by symbolic name.
 - **Fixed-point encoders** — pure functions for the ADAU1452's native 8.24
   format: gain (dB), mute, integer-sample delay, RBJ biquad EQ bands, and
   crossover biquad chains.
@@ -159,16 +159,15 @@ status matrix and [Hardware validation](#hardware-validation) below.
 ## Protocol & format documentation
 
 The reverse-engineered protocol, on-wire framing, fixed-point encoders, the
-`.at01`/`.pct6` project format, and the RTA / analyzer flow are documented in
-`docs/`:
+`.at01`/`.pct6` formats, and the RTA / analyzer flow are documented in `docs/`:
 
-- [docs/conductor-protocol.md](docs/conductor-protocol.md) — command envelope,
-  opcodes, evidence
-- [docs/encoding.md](docs/encoding.md) — SigmaStudio 8.24/5.23 fixed-point
+- [docs/conductor-protocol.md](docs/conductor-protocol.md) — command envelope
+  and opcodes
+- [docs/encoding.md](docs/encoding.md) — 8.24 fixed-point encoders
 - [docs/channels.md](docs/channels.md) — channel model overlay
 - [docs/pct6-format.md](docs/pct6-format.md) / [docs/pct6.md](docs/pct6.md) —
   vendor project format
-- [docs/input-analyzer-re.md](docs/input-analyzer-re.md) — on-chip Input Signal
+- [docs/input-analyzer.md](docs/input-analyzer.md) — on-chip Input Signal
   Analyzer
 
 ## Device support
@@ -179,25 +178,22 @@ PID→model table in [`atf_dsp/models.py`](atf_dsp/models.py) covers the current
 **MATCH / HELIX / BRAX** range (from the MATCH UP / M series through HELIX DSP /
 V-series to BRAX DSP), so any ACO device should enumerate and identify.
 
-Parameter maps are **generated**, not hand-written. Each is derived from the
-model's `.at01` **device file** — the SigmaStudio parameter export (name → DSP
-address) that the DSP PC-Tool ships with, one per model, in a `deviceFiles/`
-folder among its application files. One copy of those files therefore covers
-*every* ACO model, whether or not you own that amp — the maps here were built by
-scanning that folder. (An `.at01` is not a saved tune — that's a **`.pct6`**
-setup/project file, kept in a separate `setups/` folder and handled separately.)
-`tools/build_param_maps.py` inflates an `.at01` and writes the `{name: address}`
-JSON; **only the generated JSON is committed, never the raw `.at01`.**
+Parameter maps are **generated**, not hand-written — each is built from the
+model's own `.at01` parameter definition (a name → DSP address list), one per
+model. (An `.at01` is a device definition, not a saved tune; a saved tune is a
+**`.pct6`**, handled separately.) `tools/build_param_maps.py` turns an `.at01`
+into the `{name: address}` JSON; **only the generated JSON is committed, never
+the raw `.at01`.**
 
 The repository ships generated maps for **every model in the `MODEL_AT01`
 table** — the full MATCH / HELIX / BRAX range, including both BRAX firmware rates
 (`atf_dsp/data/*.json`), so any of them can be addressed by parameter name out of
 the box; `Device.connect()` picks the right map from the USB PID automatically.
-These are generated `{name: address}` artifacts, not raw vendor files. **Only the
-MATCH M 5.4DSP has been hardware-validated**, however; every other map is derived
-from its vendor device file and is *expected* to work (shared firmware and
-encoders) but is unverified on real hardware — treat it accordingly (see the
-caveats below).
+These are generated `{name: address}` artifacts, not raw source files. **Only the
+MATCH M 5.4DSP has been hardware-validated**, however; every other map is
+generated the same way and is *expected* to work (shared firmware and encoders)
+but is unverified on real hardware — treat it accordingly (see the caveats
+below).
 
 ### Sample rate (48 / 96 / 192 kHz)
 
@@ -226,18 +222,17 @@ also takes an explicit `fs=` override.
 
 ### Regenerating or adding a model
 
-The shipped maps can be rebuilt from your own PC-Tool install (e.g. after a
-PC-Tool update, or to add a model not yet in `MODEL_AT01`):
+The shipped maps can be regenerated, or a model not yet in `MODEL_AT01` added,
+from that model's `.at01` definition:
 
-1. Find the model's `.at01` among your DSP PC-Tool's files — they live in a
-   `deviceFiles/` folder (search the install for `*.at01`), e.g. `HelixDSP3.at01`.
-   The basename must match the one mapped for that model in
+1. Obtain the model's `.at01` file, e.g. `HelixDSP3.at01`. Its basename must
+   match the one mapped for that model in
    [`atf_dsp/models.py`](atf_dsp/models.py) (`MODEL_AT01`).
 2. Generate the parameter map:
    ```bash
    python tools/build_param_maps.py /path/to/HelixDSP3.at01 --out atf_dsp/data
-   # …or build every model found in the folder at once:
-   python tools/build_param_maps.py --scan /path/to/deviceFiles --out atf_dsp/data
+   # …or build a whole folder of them at once:
+   python tools/build_param_maps.py --scan /path/to/at01_files --out atf_dsp/data
    ```
    This writes `atf_dsp/data/<basename>.json`.
 3. Raw parameter read/write, the protocol layer, and the CLI now work for that

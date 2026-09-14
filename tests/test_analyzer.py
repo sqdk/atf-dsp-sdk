@@ -2,7 +2,7 @@
 
 No hardware: a FakeDevice returns canned readback bytes and records writes. These lock the
 decode math, the swept-read orchestration, the safety gate, and the .at01 address bindings.
-Correctness on real hardware is still unproven (see docs/input-analyzer-re.md).
+Correctness on real hardware is still unproven (see docs/input-analyzer.md).
 """
 from __future__ import annotations
 
