@@ -965,6 +965,10 @@ def apply_setup(
         A mismatch raises :class:`PidMismatchError` unless ``force``. When the device's
         internal id is unknown (not in :data:`atf_dsp.models.DEV_IDS`) the check degrades
         gracefully — it is skipped so a legitimate apply is never hard-failed.
+
+    Persistence: a live apply writes the DSP's running parameter RAM only. It is NOT stored
+    into one of the amp's setup slots — it is lost on power cycle and, most likely,
+    overwritten when a setup is selected. To keep a tune, store the ``.pct6`` via the PC-Tool.
     """
     from atf_dsp.models import dev_id_for_model
 

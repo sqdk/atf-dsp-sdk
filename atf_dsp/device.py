@@ -207,7 +207,12 @@ class Device:
     def write_param(
         self, target: AddrOrName, value: bytes, safeload: bool = True
     ) -> bytes:
-        """Write raw big-endian bytes to a DSP param by name or address."""
+        """Write raw big-endian bytes to a DSP param by name or address.
+
+        The write lands in the DSP's live parameter RAM: it takes effect immediately but is
+        NOT saved to the amp's stored setup (lost on power cycle; expect it to be overwritten
+        when a setup is selected). See the README's "Persistence" section.
+        """
         addr = self._resolve_addr(target)
         return self.proto.write_param(addr, bytes(value), safeload=safeload)
 
@@ -279,6 +284,7 @@ class Device:
 
         Dry-run by default (never transmits to real hardware). See
         :func:`atf_dsp.pct6.apply_setup` for the full safety + device-PID-match contract.
+        A live apply is RAM-only — it is not stored into a setup slot on the amp.
         """
         from atf_dsp.pct6 import apply_setup as _apply_setup
 

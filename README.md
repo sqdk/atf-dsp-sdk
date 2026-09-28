@@ -320,6 +320,28 @@ python -m pytest tests -q                                          # offline
 ATF_DSP_SDK_HW=/dev/cu.usbmodemXXXX python -m pytest tests -q      # opt-in HW (read-only)
 ```
 
+## Persistence — changes are live-only (for now)
+
+Everything the SDK writes goes to the DSP's running parameter RAM (opcode
+`0x03`). Changes take effect immediately but are **not saved to the amp's stored
+setups**: expect them to be lost on a power cycle and, most likely, overwritten
+when a setup is selected. The SDK can switch between stored setups
+(`set_setup`) but cannot yet write one — proper, hardware-tested persistence is
+planned but not implemented.
+
+Until then, the way to keep a tune is to export the live state to a PC-Tool
+setup file and store it with the DSP PC-Tool:
+
+```python
+from atf_dsp import Setup
+
+Setup.from_device(dev).save("tune.pct6")   # then load + store it in the DSP PC-Tool
+```
+
+The export covers the DSP-backed fields the SDK can read back (gain, mute, EQ,
+delay, crossover, …), not every field a full PC-Tool setup holds — treat it as a
+partial snapshot, not a full backup.
+
 ## Safety
 
 This library can write arbitrary values to DSP parameters, including gain,

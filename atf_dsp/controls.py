@@ -7,6 +7,9 @@ a 0x03 write with flag 0x00; the firmware builds the SafeLoad block, never the
 host). Encoders whose protocol.yaml status is not
 ``confirmed`` (delay, crossover, routing) are gated: they raise NotConfirmedError
 unless the caller passes ``unsafe=True``, so nothing unvalidated writes silently.
+
+All writes are live-only: they change the DSP's running parameter RAM, not the amp's stored
+setups, so they do not survive a power cycle (see the README's "Persistence" section).
 """
 from __future__ import annotations
 
