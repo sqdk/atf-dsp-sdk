@@ -139,6 +139,27 @@ _EQ_Q_BASE = (0.7, 1.5, 3.0)
 _EQ_GAIN_BASE = (-4.0, 3.0, -2.0)     # all clearly non-zero (0 dB peaking stores as bypass)
 
 
+# Standard ISO 1/3-octave band centres, 25 Hz – 20 kHz (30 bands) — the same grid the shipped
+# graphic-EQ overlay uses. Fallback so a vector can still be built for a model that has no
+# channel overlay (hence no graphic table): the EQ test points only need distinct, sensible f's.
+_ISO_THIRD_OCTAVE_HZ = (25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630,
+                        800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000,
+                        12500, 16000, 20000)
+
+
+def _band_frequency_or_iso(channel):
+    """``channel.band_frequency`` when the overlay defines a graphic table, else the ISO
+    1/3-octave fallback — so models without a channel overlay can still build a vector."""
+    from atf_dsp.channels import ChannelModelError
+
+    def band_frequency(i: int) -> float:
+        try:
+            return channel.band_frequency(i)
+        except ChannelModelError:
+            return float(_ISO_THIRD_OCTAVE_HZ[i])
+    return band_frequency
+
+
 def _eq_specs_for(channel_ordinal: int, band_frequency, band_count: int) -> List[EqSpec]:
     """Build the distinct EQ bands for one channel: three peaking bands whose f/Q/gain all
     vary with the channel ordinal so no two channels/bands share a value."""
@@ -174,7 +195,7 @@ def build_test_vector(model) -> TestVector:
         muted = (oi % 4 == 3)                      # a spread of muted outputs (e.g. D, H)
         gain = round(-1.0 - 0.5 * oi, 3)           # distinct level per output
         delay = round(0.5 * (oi + 1), 3)           # distinct ms per output (-> distinct samples)
-        eq = _eq_specs_for(oi, oc.band_frequency, oc.eq_band_count)
+        eq = _eq_specs_for(oi, _band_frequency_or_iso(oc), oc.eq_band_count)
         # crossover: rotate HP-only / LP-only / both so off-section recovery is exercised.
         char = chars[oi % 2]
         slope = 12 if (oi % 3 == 1) else 24
@@ -195,14 +216,18 @@ def build_test_vector(model) -> TestVector:
         muted = (vi % 5 == 4)
         gain = round(-2.0 - 0.5 * vi, 3)
         eq = ([] if vc.pass_through
-              else _eq_specs_for(vi, vc.band_frequency, vc.eq_band_count))
+              else _eq_specs_for(vi, _band_frequency_or_iso(vc), vc.eq_band_count))
         virtuals.append(VirtualVec(index=vi, key=vc.key, gain_db=gain, mute=muted, eq=eq))
 
     inputs: List[InputVec] = []
+    # Inputs have no graphic-frequency table; borrow the shared graphic freqs (or the ISO
+    # fallback when the model has no overlay) purely as sensible, distinct test f's. Models whose
+    # topology discovery finds no outputs at all fall straight back to the ISO grid.
+    input_freqs = (_band_frequency_or_iso(model.output(model.output_letters[0]))
+                   if model.output_letters else (lambda i: float(_ISO_THIRD_OCTAVE_HZ[i])))
     for ii, letter in enumerate(model.input_letters):
         ic = model.input(letter)
-        # inputs have no graphic-frequency table; use the shared graphic freqs as sensible f's.
-        eq = _eq_specs_for(ii + 1, model.output("A").band_frequency, ic.eq_band_count)
+        eq = _eq_specs_for(ii + 1, input_freqs, ic.eq_band_count)
         inputs.append(InputVec(letter=letter, eq=eq))
 
     routes: List[RouteCell] = []
